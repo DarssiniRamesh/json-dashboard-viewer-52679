@@ -13,34 +13,26 @@ const COLORS = {
   card: "#f8fafc",
 };
 
-// Utility for grouping entries by week
-function groupByWeek(arr, dateKey) {
+/**
+ * Utility for grouping contest entries by contest_week_id,
+ * using contest_week_name or fallback to "Week {id}"
+ * Returns { [contest_week_id]: { label, entries } }
+ */
+function groupByContestWeek(arr) {
   const weeks = {};
   arr.forEach((el) => {
-    const date = new Date(el[dateKey]);
-    // Assume week starts Monday
-    const weekId = `${date.getFullYear()}-W${getWeekNumber(date)}`;
-    if (!weeks[weekId]) weeks[weekId] = [];
-    weeks[weekId].push(el);
+    const weekId = el.contest_week_id || "0";
+    if (!weeks[weekId]) {
+      // Use label from contest_week_name or fallback
+      const label =
+        el.contest_week_name || (weekId ? `Week ${weekId}` : "Week Unknown");
+      weeks[weekId] = { label, entries: [] };
+    }
+    weeks[weekId].entries.push(el);
   });
   return weeks;
 }
-function getWeekNumber(date) {
-  // Copy date so don't modify original
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  // Set to nearest Thursday: current date + 4 - current day number
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-  // Get first day of year
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  // Calculate full weeks to nearest Thursday
-  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-  return weekNo;
-}
-function getWeekLabel(weekId) {
-  // E.g. '2024-W13' → 'Week 13 (2024)'
-  const [year, wk] = weekId.split("-W");
-  return `Week ${wk} (${year})`;
-}
+
 
 // ----- Widgets -----
 /** Widget for showing total apps */
@@ -54,23 +46,35 @@ function TotalAppsWidget({ total }) {
   );
 }
 // PUBLIC_INTERFACE
-function SubmissionsByWeekWidget({ submissionsByWeek }) {
-  /** Bar chart widget for number of submissions per week */
-  const weekIds = Object.keys(submissionsByWeek).sort();
+function SubmissionsByWeekWidget({ submissionsByWeek, weekLabels }) {
+  /** Bar chart widget for number of submissions per contest week */
+  const weekIds = Object.keys(submissionsByWeek);
   const max = Math.max(...weekIds.map((w) => submissionsByWeek[w].length));
   return (
     <div className="dashboard-card">
       <h3>Submissions by Week</h3>
-      <div style={{ display: "flex", gap: 8, alignItems:"end", minHeight: 120 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "end", minHeight: 120 }}>
         {weekIds.map((w) => (
-          <div key={w} style={{ flex:1, display: "flex", flexDirection: "column", alignItems:"center"}}>
-            <div style={{
-              background: COLORS.primary,
-              width: 24,
-              height: 80 * (submissionsByWeek[w].length/max || 0.1),
-              borderRadius: 6,
-            }} />
-            <div className="stat-label">{w.split("-W")[1]}</div>
+          <div
+            key={w}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                background: COLORS.primary,
+                width: 24,
+                height: 80 * (submissionsByWeek[w].length / max || 0.1),
+                borderRadius: 6,
+              }}
+            />
+            <div className="stat-label">
+              {weekLabels && weekLabels[w] ? weekLabels[w] : `Week ${w}`}
+            </div>
             <div className="stat-caption">{submissionsByWeek[w].length}</div>
           </div>
         ))}
@@ -89,23 +93,35 @@ function TotalVotesWidget({ totalVotes }) {
   );
 }
 // PUBLIC_INTERFACE
-function VotesByWeekWidget({ votesByWeek }) {
-  /** Bar chart widget for votes per week */
-  const weekIds = Object.keys(votesByWeek).sort();
+function VotesByWeekWidget({ votesByWeek, weekLabels }) {
+  /** Bar chart widget for votes per contest week */
+  const weekIds = Object.keys(votesByWeek);
   const max = Math.max(...weekIds.map((w) => votesByWeek[w]));
   return (
     <div className="dashboard-card">
       <h3>Votes by Week</h3>
-      <div style={{ display: "flex", gap: 8, alignItems:"end", minHeight: 120 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "end", minHeight: 120 }}>
         {weekIds.map((w) => (
-          <div key={w} style={{ flex:1, display: "flex", flexDirection: "column", alignItems:"center"}}>
-            <div style={{
-              background: COLORS.primary,
-              width: 24,
-              height: 80 * (votesByWeek[w]/max || 0.1),
-              borderRadius: 6,
-            }} />
-            <div className="stat-label">{w.split("-W")[1]}</div>
+          <div
+            key={w}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                background: COLORS.primary,
+                width: 24,
+                height: 80 * (votesByWeek[w] / max || 0.1),
+                borderRadius: 6,
+              }}
+            />
+            <div className="stat-label">
+              {weekLabels && weekLabels[w] ? weekLabels[w] : `Week ${w}`}
+            </div>
             <div className="stat-caption">{votesByWeek[w]}</div>
           </div>
         ))}
@@ -114,26 +130,29 @@ function VotesByWeekWidget({ votesByWeek }) {
   );
 }
 // PUBLIC_INTERFACE
-function TopAppsWidget({ weekId, apps }) {
-  /** Widget showing top 10 apps for a given week */
+function TopAppsWidget({ weekLabel, apps }) {
+  /** Widget showing top 10 apps for a given contest week */
   return (
     <div className="dashboard-card">
-      <h4>{getWeekLabel(weekId)}</h4>
+      <h4>{weekLabel}</h4>
       <table className="top-apps-table">
         <thead>
           <tr>
-            <th>App Name</th><th>Previews</th><th>Visits</th><th>Votes</th>
+            <th>App Name</th>
+            <th>Previews</th>
+            <th>Visits</th>
+            <th>Votes</th>
           </tr>
         </thead>
         <tbody>
-          {apps.slice(0,10).map((app,i) =>
+          {(apps || []).slice(0, 10).map((app, i) => (
             <tr key={app.app_id || app.app_name || i}>
               <td>{app.app_name ?? app.name}</td>
               <td>{app.preview_count ?? "-"}</td>
               <td>{app.visit_count ?? "-"}</td>
               <td>{app.vote_count ?? app.votes ?? 0}</td>
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
     </div>
@@ -234,29 +253,46 @@ function App() {
   ];
   const validEntries = entries && entries.length > 0 ? entries : fallbackEntries;
 
-  // Use "app_created_at" for grouping
-  const submissionsByWeek = groupByWeek(validEntries, "app_created_at");
-  const weekIds = Object.keys(submissionsByWeek).sort();
+  // ---------- Group data by contest week ----------
+  const weeks = groupByContestWeek(validEntries);
+  // Sorted by week id (as integer) for presentational order
+  const weekIds = Object.keys(weeks)
+    .filter(k => k && !isNaN(Number(k)))
+    .sort((a, b) => Number(a) - Number(b));
+  // Fallback for data without contest_week_id
+  if (weekIds.length === 0 && Object.keys(weeks).length > 0) {
+    weekIds.push(...Object.keys(weeks));
+  }
 
-  // Use "vote_count"
+  // Submissions by week (count)
+  const submissionsByWeek = {};
+  weekIds.forEach((weekId) => {
+    submissionsByWeek[weekId] = weeks[weekId]?.entries ?? [];
+  });
+
+  // Votes by week
   const votesByWeek = {};
   let voteTotal = 0;
-  validEntries.forEach((app) => {
-    const date = new Date(app.app_created_at);
-    const weekId = `${date.getFullYear()}-W${getWeekNumber(date)}`;
-    const votes = app.vote_count ?? app.votes ?? 0;
-    votesByWeek[weekId] = (votesByWeek[weekId] || 0) + votes;
-    voteTotal += votes;
+  weekIds.forEach((weekId) => {
+    const apps = weeks[weekId]?.entries || [];
+    votesByWeek[weekId] = apps.reduce(
+      (acc, app) => acc + (app.vote_count ?? app.votes ?? 0),
+      0
+    );
+    voteTotal += votesByWeek[weekId] || 0;
   });
 
   // Top apps per week
   const weekTopApps = {};
   weekIds.forEach((weekId) => {
-    weekTopApps[weekId] = submissionsByWeek[weekId]
+    weekTopApps[weekId] = (weeks[weekId]?.entries ?? [])
       .slice()
-      .sort((a, b) => (b.vote_count ?? b.votes ?? 0) - (a.vote_count ?? a.votes ?? 0)
-                  || (b.visit_count ?? 0) - (a.visit_count ?? 0)
-                  || (b.preview_count ?? 0) - (a.preview_count ?? 0));
+      .sort(
+        (a, b) =>
+          (b.vote_count ?? b.votes ?? 0) - (a.vote_count ?? a.votes ?? 0) ||
+          (b.visit_count ?? 0) - (a.visit_count ?? 0) ||
+          (b.preview_count ?? 0) - (a.preview_count ?? 0)
+      );
   });
 
   // Word and sentence clouds
@@ -312,18 +348,30 @@ function App() {
             )}
             <div className="dashboard-row">
               <TotalAppsWidget total={validEntries.length} />
-              <SubmissionsByWeekWidget submissionsByWeek={submissionsByWeek}/>
-              <TotalVotesWidget totalVotes={voteTotal}/>
-              <VotesByWeekWidget votesByWeek={votesByWeek}/>
+              <SubmissionsByWeekWidget
+                submissionsByWeek={submissionsByWeek}
+                weekLabels={weekIds.reduce((acc, id) => {
+                  acc[id] = weeks[id]?.label ?? `Week ${id}`;
+                  return acc;
+                }, {})}
+              />
+              <TotalVotesWidget totalVotes={voteTotal} />
+              <VotesByWeekWidget
+                votesByWeek={votesByWeek}
+                weekLabels={weekIds.reduce((acc, id) => {
+                  acc[id] = weeks[id]?.label ?? `Week ${id}`;
+                  return acc;
+                }, {})}
+              />
             </div>
             <div className="dashboard-row top-apps-row">
-              {weekIds.slice(0,4).map((weekId) =>
+              {weekIds.slice(0, 4).map((weekId) => (
                 <TopAppsWidget
                   key={weekId}
-                  weekId={weekId}
+                  weekLabel={weeks[weekId]?.label ?? `Week ${weekId}`}
                   apps={weekTopApps[weekId]}
                 />
-              )}
+              ))}
             </div>
           </div>
         ) : route === "/clouds" ? (
