@@ -13,15 +13,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// PUBLIC_INTERFACE
 /**
  * AnalyticsPage displays weekly summary and totals for submissions and votes using interactive charts.
  * Data source: app.json
+ * Enhanced with debug logging and UI diagnostics.
  */
 function AnalyticsPage() {
   const [weeklyData, setWeeklyData] = useState([]);
   const [totals, setTotals] = useState({ submissions: 0, votes: 0, weeks: 0, start: "", end: "" });
   const [loading, setLoading] = useState(true);
+  const [dataError, setDataError] = useState(false);
+  const [rawAppData, setRawAppData] = useState(null);
 
   useEffect(() => {
     fetch("./app.json")
@@ -29,15 +31,23 @@ function AnalyticsPage() {
       .then((data) => {
         // Debug: Log full JSON when loaded
         console.debug("[AnalyticsPage] Loaded app.json:", data);
+        setRawAppData(data);
 
-        // app.json contains an array of apps/submissions with vote info and date fields.
-        // Example: { app_id, app_name, vote_count, app_created_at, contest_week_name, ... }
+        // Validate structure: Expect an array of objects with vote/submission info.
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          setDataError(true);
+          setLoading(false);
+          console.warn("[AnalyticsPage] app.json data is empty, malformed, or not an array:", data);
+          return;
+        }
+
         processAnalyticsData(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("[AnalyticsPage] Failed to load app.json", err);
+        setDataError(true);
         setLoading(false);
+        console.error("[AnalyticsPage] Failed to load app.json", err);
       });
   }, []);
 
@@ -62,7 +72,8 @@ function AnalyticsPage() {
     const weekData = {};
     let totalSubmissions = 0;
     let totalVotes = 0;
-    let minDate = null, maxDate = null;
+    let minDate = null,
+      maxDate = null;
 
     // Use vote_count from app.json as the true vote field
     items.forEach((item, idx) => {
@@ -100,7 +111,6 @@ function AnalyticsPage() {
     if (Object.keys(weekData).length > 0) {
       weekList = Object.values(weekData).sort((a, b) => (a.week > b.week ? 1 : -1));
     }
-
     // Debug output for final weeklyData
     console.debug("[AnalyticsPage] Aggregated weeklyData:", weekList);
 
@@ -121,6 +131,52 @@ function AnalyticsPage() {
   return (
     <div className="analytics-page">
       <h2 className="analytics-title">Analytics Overview</h2>
+
+      {/* UI warning for empty/malformed data */}
+      {dataError && (
+        <div
+          className="analytics-warning-banner"
+          style={{
+            background: "#ffe0e0",
+            color: "#d32f2f",
+            padding: "1.2em",
+            borderRadius: "7px",
+            margin: "1em auto",
+            fontWeight: "bold",
+            border: "2px solid #d32f2f",
+            maxWidth: 600,
+          }}
+        >
+          ⚠️ Analytics Data Error: The loaded <b>app.json</b> data is empty, incomplete, or malformed.<br />
+          <span style={{ fontWeight: 400, fontSize: "0.97em" }}>
+            Please check the format and contents of <code>src/app.json</code>.<br />
+            See the browser <b>console</b> for debug logs of <code>app.json</code> and weekly aggregation results.
+          </span>
+        </div>
+      )}
+
+      {/* Diagnostic summary box for quick reference */}
+      <pre
+        style={{
+          background: "#eee",
+          color: "#444",
+          padding: "0.8em",
+          borderRadius: "4px",
+          fontSize: "0.92em",
+          maxWidth: 800,
+          overflowX: "auto",
+        }}
+      >
+        <b>Data Diagnostics</b>
+        {"\n"}
+        app.json loaded: {rawAppData ? "yes" : "no"}
+        {"\n"}records in file:{" "}
+        {Array.isArray(rawAppData) ? rawAppData.length : typeof rawAppData}
+        {"\n"}weeklyData agg: {Array.isArray(weeklyData) ? weeklyData.length : 0}
+        {"\n"}submissions counted: {totals.submissions}
+        {"\n"}votes counted: {totals.votes}
+      </pre>
+
       <div className="totals-card">
         <div>
           <span className="totals-label">Total Submissions:</span>{" "}
@@ -138,7 +194,9 @@ function AnalyticsPage() {
           <div>
             <span className="totals-label">From:</span>{" "}
             <span className="totals-value">{totals.start}</span>
-            <span className="totals-label" style={{ marginLeft: 12 }}>To:</span>{" "}
+            <span className="totals-label" style={{ marginLeft: 12 }}>
+              To:
+            </span>{" "}
             <span className="totals-value">{totals.end}</span>
           </div>
         )}
