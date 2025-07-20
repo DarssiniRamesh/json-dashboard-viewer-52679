@@ -7,6 +7,7 @@ import "./WordCloudPage.css";
  * PUBLIC_INTERFACE
  * Displays an interactive word cloud visualization extracted from app.json,
  * as a visually prominent dashboard widget matching the theme.
+ * Only includes keywords from 'unique_features', 'third_party_integrations', and 'challenges_faced'.
  */
 function WordCloudPage() {
   const svgRef = useRef();
@@ -33,34 +34,35 @@ function WordCloudPage() {
       });
   }, []);
 
-  // Extract visible/meaningful keywords from app data for the cloud
+  // Extract keywords only from 'unique_features', 'third_party_integrations', 'challenges_faced'
   const words = useMemo(() => {
     if (!appData.length) return [];
 
-    // Helper: flat string from an app
-    const appText = (app) =>
-      [
-        app.app_name,
-        app.feature_list,
+    // Helper: extract contents of the relevant fields for each app
+    const extractRelevantFields = (app) => {
+      return [
         app.unique_features,
         app.third_party_integrations,
+        app.challenges_faced,
       ]
         .filter(Boolean)
-        .map((s) => (typeof s === "string" ? s : ""))
-        .join(" ")
-        .replace(/[.,\-:;_\[\](){}|<>\/0-9'"\\n]/g, " ") // Remove most special chars/numbers
-        .toLowerCase();
+        .map((val) => (typeof val === "string" ? val : ""))
+        .join(" ");
+    };
 
-    // Choose all concatenated words for all apps
-    let allText = appData.map(appText).join(" ");
-    // Remove stop words for UX; could use common list, but build-in for simplicity
+    // Concatenate, clean
+    let allText = appData.map(extractRelevantFields).join(" ");
+    allText = allText.replace(/[.,\-:;_\[\](){}|<>\/0-9'\"\\n]/g, " ").toLowerCase();
+
+    // Stop words
     const STOP_WORDS = new Set([
       "the","of","to","and","a","in","for","on","at","is","with","by","as","an","it","from",
       "or","be","this","that","are","was","can","has","will","not","but","if","use",
       "via","app","apps","feature","used","made","you","lets","have","all","api","page",
       "user","users","login","new","one","more","each","based","only","any","get","see"
     ]);
-    // Flatten and count
+
+    // Split, filter, count
     const freq = {};
     allText
       .split(/\s+/)
@@ -68,11 +70,12 @@ function WordCloudPage() {
       .forEach((word) => {
         freq[word] = 1 + (freq[word] || 0);
       });
-    // Only keep the top N words, scale nicely
+
+    // Grab top 60, scale for word cloud
     const sorted = Object.entries(freq)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 60);
-    // Provide a good scale
+
     return sorted.map(([word, count]) => ({
       text: word,
       size: 16 + Math.sqrt(count) * 18, // nonlinear size for aesthetics
@@ -118,13 +121,11 @@ function WordCloudPage() {
         .style("cursor", "pointer")
         .on("mouseover", function (event, d) {
           d3.select(this).style("fill", "#1976D2").style("font-weight", "bold");
-          // Tooltip (native title)
           d3.select(this).append("title").text(`Count: ${d.count}`);
         })
         .on("mouseout", function (event, d, nodes) {
           d3.select(this).style("fill", (d, i) => d3.schemeCategory10[i % d3.schemeCategory10.length])
             .style("font-weight", "normal");
-          // Remove tooltip
           d3.select(this).select("title").remove();
         })
         .text((d) => d.text);
