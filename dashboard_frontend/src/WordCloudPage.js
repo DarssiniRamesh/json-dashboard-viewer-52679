@@ -1,146 +1,184 @@
-import React, { useState } from 'react';
-import './WordCloudPage.css';
+import React, { useState } from "react";
+import ReactWordcloud from "react-wordcloud";
+import "./WordCloudPage.css";
+import appJson from "./app.json";
 
-// Simple word cloud item, with size and color based on prominence factor
-const getRandomColor = () => {
-  const palette = [
-    '#1976D2', '#388E3C', '#F44336', '#FFC107', '#9C27B0', '#E040FB', '#00B8D4',
-    '#FF7043', '#8BC34A', '#5C6BC0', '#607D8B', '#795548'
-  ];
-  return palette[Math.floor(Math.random() * palette.length)];
-};
+/**
+ * Extract and prepare word cloud data from appJson.
+ * Update this function as your schema changes.
+ */
+function getCloudDataFromAppJson(tab) {
+  // You might want to adapt this if your structure changes.
+  // For demo, fallback to the previous hardcoded data if appJson structure doesn't include expected fields.
 
-function WordCloud({ data }) {
-  return (
-    <div className="wordcloud-container">
-      {data.map((item, idx) => (
-        <span
-          key={idx}
-          style={{
-            fontSize: `${1 + item.prominence * 2}em`,
-            color: getRandomColor(),
-            margin: '0.25em',
-            fontWeight: item.prominence > 0.5 ? 'bold' : '500',
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            transition: 'all 0.3s'
-          }}
-          className="wordcloud-word"
-          title={item.desc}
-        >
-          {item.word}
-        </span>
-      ))}
-    </div>
-  );
+  if (
+    appJson &&
+    appJson.visualizations &&
+    typeof appJson.visualizations === "object"
+  ) {
+    if (tab === "integrations" && appJson.visualizations.integrations) {
+      // Example schema: [{ word: "Supabase", freq: 18 }, ...]
+      return appJson.visualizations.integrations.map((item) => ({
+        text: item.word ?? item.text,
+        value: item.freq ?? item.value ?? 1,
+      }));
+    }
+    if (tab === "features" && appJson.visualizations.features) {
+      return appJson.visualizations.features.map((item) => ({
+        text: item.word ?? item.text,
+        value: item.freq ?? item.value ?? 1,
+      }));
+    }
+    if (tab === "challenges" && appJson.visualizations.challenges) {
+      // For "challenges", treat sentences as "words" (sentence cloud)
+      return appJson.visualizations.challenges.map((sent, i) => ({
+        text: sent,
+        value: 10 + (sent.length % 10), // subtle size variation by length
+      }));
+    }
+  }
+
+  // Fallback static if appJson is missing/invalid
+  if (tab === "integrations") {
+    return [
+      { text: "Supabase", value: 18 },
+      { text: "AWS", value: 13 },
+      { text: "Stripe", value: 11 },
+      { text: "Twilio", value: 7 },
+      { text: "OAuth", value: 10 },
+      { text: "OpenAI", value: 9 },
+      { text: "Google", value: 6 },
+    ];
+  } else if (tab === "features") {
+    return [
+      { text: "AI-powered", value: 17 },
+      { text: "Real-time Sync", value: 11 },
+      { text: "API-first", value: 9 },
+      { text: "Custom Widgets", value: 12 },
+      { text: "Mobile Responsive", value: 10 },
+      { text: "Dark Mode", value: 7 },
+      { text: "Internationalization", value: 6 },
+    ];
+  } else if (tab === "challenges") {
+    return [
+      {
+        text: "Rate limits and quotas",
+        value: 20,
+      },
+      {
+        text: "Vendor lock-in risk",
+        value: 14,
+      },
+      {
+        text: "Async data race conditions",
+        value: 16,
+      },
+      {
+        text: "Third-party API instability",
+        value: 13,
+      },
+      {
+        text: "UI performance tuning",
+        value: 15,
+      },
+      {
+        text: "Security compliance overhead",
+        value: 16,
+      },
+      {
+        text: "Integration test complexity",
+        value: 11,
+      },
+    ];
+  }
+  return [];
 }
 
-function SentenceCloud({ sentences }) {
-  return (
-    <div className="sentencecloud-container">
-      {sentences.map((item, idx) => (
-        <div
-          key={idx}
-          style={{
-            color: getRandomColor(),
-            fontStyle: 'italic',
-            fontSize: `${1 + item.prominence}em`,
-            marginBottom: '0.7em',
-            background: '#FAFAFA',
-            borderRadius: '14px',
-            boxShadow: '0 2px 7px rgba(50,50,70,0.09)',
-            padding: '0.7em 1em',
-            display: 'inline-block',
-            transition: 'all 0.3s'
-          }}
-          className="sentencecloud-sentence"
-        >
-          {item.sentence}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const TABS = [
-  { key: 'integrations', name: 'Third-party Integrations' },
-  { key: 'features', name: 'Unique Features' },
-  { key: 'challenges', name: 'Challenges Faced' },
+/**
+ * Teal-friendly word cloud palette for prominent/less prominent words.
+ */
+const tealPalette = [
+  "#1976D2",
+  "#009688",
+  "#26C6DA",
+  "#43A047",
+  "#0288D1",
+  "#80CBC4",
+  "#00BCD4",
+  "#00897B",
+  "#00ACC1",
+  "#B2EBF2",
+  "#62CBC9",
 ];
 
-// Example mocked data - replace with dynamic data as needed
-const DATA = {
-  integrations: {
-    words: [
-      { word: 'Supabase', prominence: 0.9, desc: 'Real-time DB backend' },
-      { word: 'Firebase', prominence: 0.7, desc: 'Alternative backend' },
-      { word: 'OAuth2', prominence: 0.5, desc: 'Authentication protocol' },
-      { word: 'GitHub', prominence: 0.4, desc: 'Repository hosting' },
-      { word: 'Chart.js', prominence: 0.6, desc: 'Charting library' },
-      { word: 'React Router', prominence: 0.3, desc: 'Routing' }
-    ],
-    sentences: [
-      { sentence: 'Integration with Supabase enables real-time collaboration.', prominence: 0.7 },
-      { sentence: 'OAuth2 is leveraged for secure authentication.', prominence: 0.6 },
-      { sentence: 'GitHub workflows automate deployment.', prominence: 0.5 }
-    ]
-  },
-  features: {
-    words: [
-      { word: 'Live Analytics', prominence: 0.8, desc: 'Shows real-time data' },
-      { word: 'Dark Mode', prominence: 0.5, desc: 'User-selectable theme' },
-      { word: 'Drag-and-Drop', prominence: 0.7, desc: 'Customizable dashboards' },
-      { word: 'Notifications', prominence: 0.6, desc: 'Alert system' },
-      { word: 'Responsive', prominence: 0.9, desc: 'Works on all devices' }
-    ],
-    sentences: [
-      { sentence: 'Features customizable data widgets.', prominence: 0.7 },
-      { sentence: 'Supports both light and dark UI themes.', prominence: 0.6 }
-    ]
-  },
-  challenges: {
-    words: [
-      { word: 'API Limits', prominence: 0.7, desc: 'Faced API quota issues' },
-      { word: 'Data Sync', prominence: 0.5, desc: 'Ensuring up-to-date data' },
-      { word: 'Deployment', prominence: 0.6, desc: 'Multi-environment setup' },
-      { word: 'Performance', prominence: 0.8, desc: 'Handling large data sets' }
-    ],
-    sentences: [
-      { sentence: 'Optimizing performance for large word clouds required memoization.', prominence: 0.9 },
-      { sentence: 'Dealing with third-party API downtime was a major hurdle.', prominence: 0.7 }
-    ]
+/**
+ * Custom word cloud options for visual richness
+ */
+const getWordCloudOptions = (tab) => ({
+  colors: tealPalette,
+  fontFamily: "Poppins, sans-serif",
+  fontSizes: [26, 64],
+  rotations: 3,
+  rotationAngles: [-10, 0, 10],
+  scale: "sqrt",
+  spiral: "archimedean",
+  transitionDuration: 800,
+  enableTooltip: true,
+  deterministic: false,
+  fontStyle: tab === "challenges" ? "italic" : "normal",
+  fontWeight: tab === "challenges" ? "normal" : "bold",
+});
+
+/**
+ * Responsive container for word clouds
+ */
+function WordCloudPage() {
+  const [tab, setTab] = useState("integrations");
+  const words = getCloudDataFromAppJson(tab);
+  const options = getWordCloudOptions(tab);
+
+  // For sentence cloud, tweak min/max size
+  if (tab === "challenges") {
+    options.fontSizes = [18, 38];
   }
-};
-
-
-export default function WordCloudPage() {
-  const [tab, setTab] = useState('integrations');
-  const selected = DATA[tab];
 
   return (
-    <div className="wordcloud-main" style={{maxWidth: 1140, margin: '2em auto', background: '#fff', borderRadius: 20, padding: '2em 2.2em', boxShadow: '0 6px 32px rgba(44,77,140,0.11)'}}>
-      <h2 style={{marginTop: 0, color: '#1976D2', fontWeight: 900, fontSize: '2.25em', letterSpacing: '-1px'}}>Insights Snapshot</h2>
-      <div style={{display: 'flex', gap: 18, marginBottom: '2em'}}>
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`wordcloud-tab${tab === t.key ? ' active' : ''}`}
-          >
-            {t.name}
-          </button>
-        ))}
+    <div className="wordcloud-page">
+      <h2>Project Word & Sentence Clouds</h2>
+      <div className="tabs">
+        <button
+          className={tab === "integrations" ? "active" : ""}
+          onClick={() => setTab("integrations")}
+        >
+          Third-party Integrations
+        </button>
+        <button
+          className={tab === "features" ? "active" : ""}
+          onClick={() => setTab("features")}
+        >
+          Unique Features
+        </button>
+        <button
+          className={tab === "challenges" ? "active" : ""}
+          onClick={() => setTab("challenges")}
+        >
+          Challenges Faced
+        </button>
       </div>
-      <div style={{display: 'flex', flexWrap: 'wrap', gap: 40}}>
-        <div style={{flex: '1 1 55%', minWidth: 320}}>
-          <h3 style={{color: '#424242', margin: '0 0 0.5em 0'}}>Word Cloud</h3>
-          <WordCloud data={selected.words} />
-        </div>
-        <div style={{flex: '1 1 30%', minWidth: 260}}>
-          <h3 style={{color: '#424242', margin: '0 0 0.5em 0'}}>Sentence Cloud</h3>
-          <SentenceCloud sentences={selected.sentences} />
-        </div>
+      <div className="cloud-container">
+        <ReactWordcloud
+          words={words}
+          options={options}
+          style={{ height: 380, width: "100%" }}
+        />
+      </div>
+      <div className="cloud-legend">
+        <span>
+          <b>Tip:</b> Larger and bolder words/phrases are more prominent.
+        </span>
       </div>
     </div>
   );
 }
+
+export default WordCloudPage;
