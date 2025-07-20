@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
-import ReactWordcloud from "react-wordcloud";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import * as d3 from "d3";
+import cloud from "d3-cloud";
 import "./WordCloudPage.css";
 import appJson from "./app.json";
 
@@ -160,10 +161,11 @@ const getWordCloudOptions = (tab) => ({
 
 function WordCloudPage() {
   const [tab, setTab] = useState("integrations");
+  const wordCloudRef = useRef();
 
   // Compute only if tab or appJson changes
   const words = useMemo(() => {
-    // If visualizations exist in static JSON (legacy schema), use that.
+    // ... same as before ...
     if (
       appJson &&
       appJson.visualizations &&
@@ -188,9 +190,7 @@ function WordCloudPage() {
         }));
       }
     }
-    // If there is app-level data (array of apps)
     if (Array.isArray(appJson)) {
-      // Aggregate and boost for top apps on integrations/features
       const topIds = getTopAppIdsByWeek(appJson);
       if (tab === "integrations") {
         const arr = aggregateAndWeightKeywords(
@@ -212,7 +212,6 @@ function WordCloudPage() {
         return fallback.challenges;
       }
     }
-    // Fallback
     if (tab === "integrations") return fallback.integrations;
     if (tab === "features") return fallback.features;
     if (tab === "challenges") return fallback.challenges;
@@ -221,6 +220,83 @@ function WordCloudPage() {
 
   const options = getWordCloudOptions(tab);
   if (tab === "challenges") options.fontSizes = [18, 38];
+
+  // Word cloud drawing hook using d3-cloud
+  useEffect(() => {
+    if (!wordCloudRef.current) return;
+
+    // Setup
+    const width = 650; // can be responsive
+    const height = 380;
+    // Clear previous SVG
+    d3.select(wordCloudRef.current).selectAll("*").remove();
+    if (!words.length) return;
+
+    // Normalize size
+    const minFont = (options.fontSizes && options.fontSizes[0]) || 28;
+    const maxFont = (options.fontSizes && options.fontSizes[1]) || 64;
+    const minVal = d3.min(words, d => d.value);
+    const maxVal = d3.max(words, d => d.value);
+    const scale = d3.scaleLinear()
+      .domain([minVal, maxVal])
+      .range([minFont, maxFont]);
+
+    // Color function
+    const colors = options.colors || tealPalette;
+    const color = d3.scaleOrdinal(colors);
+
+    // Generate layout
+    cloud()
+      .size([width, height])
+      .words(
+        words.map(d => ({
+          text: d.text,
+          value: d.value,
+        }))
+      )
+      .padding(5)
+      .font(options.fontFamily || "Poppins, sans-serif")
+      .fontWeight(options.fontWeight || "bold")
+      .fontStyle(options.fontStyle || "normal")
+      .fontSize(d => scale(d.value))
+      .rotate(() =>
+        options.rotationAngles
+          ? options.rotationAngles[
+              Math.floor(Math.random() * options.rotationAngles.length)
+            ]
+          : 0
+      )
+      .spiral(options.spiral || "archimedean")
+      .on("end", draw)
+      .start();
+
+    function draw(wordsLayout) {
+      const svg = d3
+        .select(wordCloudRef.current)
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", height)
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);
+
+      svg
+        .selectAll("text")
+        .data(wordsLayout)
+        .enter()
+        .append("text")
+        .style("font-family", options.fontFamily || "Poppins, sans-serif")
+        .style("font-weight", d => options.fontWeight || (tab === "challenges" ? "normal" : "bold"))
+        .style("font-style", d => options.fontStyle || (tab === "challenges" ? "italic" : "normal"))
+        .style("fill", (d, i) => color(i))
+        .style("font-size", d => `${d.size}px`)
+        .attr("text-anchor", "middle")
+        .attr("transform", d => `translate(${d.x},${d.y}) rotate(${d.rotate})`)
+        .text(d => d.text)
+        .append("title")
+        .text(d => d.text + (d.value ? ` (${d.value})` : ""));
+    }
+  }, [words, options, tab]);
 
   return (
     <div className="wordcloud-page">
@@ -246,11 +322,7 @@ function WordCloudPage() {
         </button>
       </div>
       <div className="cloud-container">
-        <ReactWordcloud
-          words={words}
-          options={options}
-          style={{ height: 380, width: "100%" }}
-        />
+        <div ref={wordCloudRef} style={{ height: 380, width: "100%" }} />
       </div>
       <div className="cloud-legend">
         <span>
