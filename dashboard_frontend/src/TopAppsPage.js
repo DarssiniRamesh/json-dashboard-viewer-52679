@@ -66,16 +66,11 @@ function WeekTabs({ weekIds, weeks, activeWeek, onWeekChange }) {
 /**
  * PUBLIC_INTERFACE
  * AppCard component for Top Apps.
- * Displays app info, visit link, and the creator's name.
+ * Displays app info, visit link, and the creator's name from the 'username' field only.
  */
 function AppCard({ app }) {
-  // Find a field for creator's name
-  const creator =
-    app.created_by_name ||
-    app.created_by ||
-    app.creator_name ||
-    app.creator ||
-    "Unknown User";
+  // Only use the 'username' field for the creator's name
+  const creator = app.username || "Unknown User";
 
   return (
     <div className="topapp-card">
@@ -84,28 +79,18 @@ function AppCard({ app }) {
       </div>
       <div className="topapp-card-content">
         <div className="topapp-title">{app.app_name}</div>
-        <div style={{margin: "7px 0 7px 0"}}>
+        <div style={{ margin: "10px 0 10px 0", display: "flex", alignItems: "center" }}>
           <span
             style={{
               color: COLORS.primary,
               fontWeight: 600,
-              letterSpacing: "0.05em",
               fontSize: 15,
-              marginRight: 6
-            }}>
-            Creator:
-          </span>
-          <span
-            style={{
-              color: COLORS.text,
-              fontWeight: 500,
-              fontSize: 15,
-              backgroundColor: "#E8F4FD",
-              padding: "2px 10px",
+              background: "#e3f0fb",
+              padding: "2px 12px",
               borderRadius: "10px",
-              verticalAlign: "middle"
+              letterSpacing: "0.05em",
             }}>
-            {creator}
+            Creator: {creator}
           </span>
         </div>
         <div className="topapp-action-row">
