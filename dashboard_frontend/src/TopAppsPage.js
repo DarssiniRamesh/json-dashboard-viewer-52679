@@ -4,7 +4,7 @@ import "./App.css";
 
 /**
  * PUBLIC_INTERFACE
- * Top 10 Apps per Week Page
+ * Top 10 Apps per Week Page - Responsive grid with 5 cards per row.
  * Modern teal-themed grid layout, tab selector for Week 1-4/All, responsive cards.
  */
 const COLORS = {
@@ -80,16 +80,20 @@ function AppCard({ app }) {
           >
             Visit App
           </a>
-          <div className="creator-chip" title="Created by" style={{
-            background: "#E0F7FA",
-            color: "#008080",
-            borderRadius: "999px",
-            padding: "3px 12px",
-            fontSize: "0.97em",
-            marginLeft: 8,
-            fontWeight: 500,
-            alignSelf: "center"
-          }}>
+          <div
+            className="creator-chip"
+            title="Created by"
+            style={{
+              background: "#E0F7FA",
+              color: "#008080",
+              borderRadius: "999px",
+              padding: "3px 12px",
+              fontSize: "0.97em",
+              marginLeft: 8,
+              fontWeight: 500,
+              alignSelf: "center",
+            }}
+          >
             {app.username ? `By ${app.username}` : "Creator Unknown"}
           </div>
         </div>
@@ -129,9 +133,42 @@ export default function TopAppsPage() {
     ];
   }
 
+  // Responsive CSS for 5 columns at desktop, less for smaller sizes
+  // These styles ensure exactly 5 cards per row at >=1280px width
   return (
     <div className="topapps-root" style={{ background: COLORS.secondary, minHeight: "100vh" }}>
       <h2 className="topapps-header">Top 10 Apps per Week</h2>
+      {/* Responsive grid CSS injected here */}
+      <style>
+        {`
+        .topapps-card-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 1.5rem;
+          margin: 2.3rem 0 1rem 0;
+        }
+        @media (max-width: 1280px) {
+          .topapps-card-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+        @media (max-width: 950px) {
+          .topapps-card-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        @media (max-width: 700px) {
+          .topapps-card-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 470px) {
+          .topapps-card-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        `}
+      </style>
       <WeekTabs
         weekIds={weekIds}
         weeks={byWeek}
