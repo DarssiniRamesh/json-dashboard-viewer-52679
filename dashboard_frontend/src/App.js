@@ -43,6 +43,11 @@ function Sidebar() {
   );
 }
 
+/**
+ * The App component serves as the root component for the dashboard application.
+ * It sets up the main layout, navigation, and routes for displaying analytics,
+ * visualizations, and interactive widgets sourced from static JSON data.
+ */
 // PUBLIC_INTERFACE
 function App() {
   return (
