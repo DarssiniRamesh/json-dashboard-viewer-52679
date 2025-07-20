@@ -41,13 +41,28 @@ function getTopAppIdsByWeek(apps) {
 
 // Extracts keywords for integrations (or features or other fields)
 function extractKeywords(app, type) {
+  // Compatibility for legacy and new schema fields
   if (type === "integrations") {
-    // Combine potential integration sources
+    // Include both old and new ("third_party_integrations") schema fields
     let kws = [
       ...(Array.isArray(app.integrations) ? app.integrations : []),
       ...(Array.isArray(app.api_integrations) ? app.api_integrations : []),
       ...(Array.isArray(app.oauth_services) ? app.oauth_services : []),
     ];
+    // Add string and array: "third_party_integrations"
+    if (app.third_party_integrations) {
+      if (Array.isArray(app.third_party_integrations)) {
+        kws.push(...app.third_party_integrations);
+      } else if (typeof app.third_party_integrations === "string") {
+        // Split by newlines or commas if multiple are present
+        kws.push(
+          ...app.third_party_integrations
+            .split(/[\n,]+/)
+            .map((t) => t.trim())
+            .filter(Boolean)
+        );
+      }
+    }
     // If some are comma-separated string lists, split
     return kws.flatMap((k) =>
       typeof k === "string" && k.includes(",")
@@ -56,11 +71,37 @@ function extractKeywords(app, type) {
     );
   }
   if (type === "features") {
+    // Support old and new ("feature_list", "unique_features") fields
     let kws = [
       ...(Array.isArray(app.features) ? app.features : []),
       ...(Array.isArray(app.capabilities) ? app.capabilities : []),
       ...(Array.isArray(app.unique_points) ? app.unique_points : []),
     ];
+    // Merge legacy unique_features, feature_list, which could be array or string
+    if (app.unique_features) {
+      if (Array.isArray(app.unique_features)) {
+        kws.push(...app.unique_features);
+      } else if (typeof app.unique_features === "string") {
+        kws.push(
+          ...app.unique_features
+            .split(/[\n,]+/)
+            .map((t) => t.trim())
+            .filter(Boolean)
+        );
+      }
+    }
+    if (app.feature_list) {
+      if (Array.isArray(app.feature_list)) {
+        kws.push(...app.feature_list);
+      } else if (typeof app.feature_list === "string") {
+        kws.push(
+          ...app.feature_list
+            .split(/[\n,]+/)
+            .map((t) => t.trim())
+            .filter(Boolean)
+        );
+      }
+    }
     // Optionally extract notable phrases from description
     if (typeof app.description === "string" && app.description.length > 0) {
       const descPhrases = app.description
@@ -74,6 +115,29 @@ function extractKeywords(app, type) {
         ? k.split(",").map((x) => x.trim()).filter(Boolean)
         : [k].filter(Boolean)
     );
+  }
+  if (type === "challenges") {
+    // For challenges, support both array and string field "challenges_faced"
+    let kws = [];
+    if (app.challenges) {
+      if (Array.isArray(app.challenges)) {
+        kws.push(...app.challenges);
+      } else if (typeof app.challenges === "string") {
+        kws.push(
+          ...app.challenges.split(/[\n,]+/).map((t) => t.trim()).filter(Boolean)
+        );
+      }
+    }
+    if (app.challenges_faced) {
+      if (Array.isArray(app.challenges_faced)) {
+        kws.push(...app.challenges_faced);
+      } else if (typeof app.challenges_faced === "string") {
+        kws.push(
+          ...app.challenges_faced.split(/[\n,]+/).map((t) => t.trim()).filter(Boolean)
+        );
+      }
+    }
+    return kws;
   }
   return [];
 }
