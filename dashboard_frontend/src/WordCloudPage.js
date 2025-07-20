@@ -237,7 +237,11 @@ function WordCloudPage() {
           "integrations",
           topIds
         );
-        return arr.length > 0 ? arr : fallback.integrations;
+        // Force fallback if extracted array is empty or all values are trivial/empty
+        if (!arr || arr.length === 0 || arr.every(w => !w.text || w.text.trim() === "")) {
+          return fallback.integrations;
+        }
+        return arr;
       }
       if (tab === "features") {
         const arr = aggregateAndWeightKeywords(
@@ -245,10 +249,22 @@ function WordCloudPage() {
           "features",
           topIds
         );
-        return arr.length > 0 ? arr : fallback.features;
+        if (!arr || arr.length === 0 || arr.every(w => !w.text || w.text.trim() === "")) {
+          return fallback.features;
+        }
+        return arr;
       }
       if (tab === "challenges") {
-        return fallback.challenges;
+        // No meaningful challenge fields? Use fallback.
+        const arr = aggregateAndWeightKeywords(
+          appJson,
+          "challenges",
+          topIds
+        );
+        if (!arr || arr.length === 0 || arr.every(w => !w.text || w.text.trim() === "")) {
+          return fallback.challenges;
+        }
+        return arr;
       }
     }
     // Fallback
