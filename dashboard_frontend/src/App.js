@@ -225,7 +225,13 @@ function App() {
 
   // --------- Data Extraction from app.json ----------
   // app.json expected to be an array of app entries with submission/vote info
-  const entries = appData.entries || appData || [];
+  // Make robust: force into array if not already one
+  let entriesRaw = appData.entries || appData || [];
+  let entries = Array.isArray(entriesRaw)
+    ? entriesRaw
+    : (typeof entriesRaw === "object" && entriesRaw !== null)
+      ? Object.values(entriesRaw)
+      : [];
   // handle both "appData.entries" (if array is under this field) or just array
 
   // Get week grouping for submissions and votes
