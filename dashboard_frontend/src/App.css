@@ -105,7 +105,7 @@ main {
   font-weight: 600;
 }
 
-/* Top 10 apps table */
+/* Top 10 apps table (for deprecated widget) */
 .top-apps-table {
   width: 100%;
   border-collapse: collapse;
@@ -133,6 +133,162 @@ main {
   font-size: 1.04em;
 }
 
+/* --- Top 10 Apps Page Styles --- */
+.topapps-root {
+  padding: 32px 18px;
+}
+.topapps-header {
+  color: #008080;
+  font-weight: 800;
+  font-size: 2.3rem;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+  text-align: center;
+}
+.topapps-tabs {
+  display: flex;
+  gap: 0.7em;
+  margin: 0 auto 28px auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.topapps-tab {
+  border: none;
+  background: #e0f2f1;
+  color: #008080;
+  font-weight: 600;
+  font-size: 1.06em;
+  border-radius: 100em;
+  min-width: 105px;
+  padding: 8px 22px;
+  margin: 0 2px;
+  cursor: pointer;
+  transition: background .17s;
+  outline: none;
+}
+.topapps-tab.active,
+.topapps-tab:hover {
+  background: #008080;
+  color: #fff;
+  box-shadow: 0 1px 6px #00808027;
+}
+.topapps-section {
+  margin: 30px 0 54px 0;
+}
+.topapps-week-title {
+  color: #37474f;
+  font-size: 1.35em;
+  font-weight: 700;
+  margin-bottom: 12px;
+  margin-top: 12px;
+  letter-spacing: 0.01em;
+}
+
+.topapps-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px, 1fr));
+  gap: 24px;
+  margin: 0 auto;
+  align-items: stretch;
+  max-width: 1140px;
+}
+
+/* Individual App Card */
+.topapp-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px #00808019, 0 1.5px 2.5px #aaa1;
+  border: 1.7px solid #e0f2f1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .19s,transform .18s;
+  position: relative;
+  min-height: 278px;
+}
+.topapp-card:hover {
+  box-shadow: 0 8px 30px #13bebe38, 0 1.5px 8px #0080802c;
+  transform: translateY(-2px) scale(1.025);
+  border-color: #1de9b6;
+}
+.topapp-img-wrap {
+  border-bottom: 1.5px solid #e0f2f1;
+  width: 100%;
+  height: 148px;
+  overflow: hidden;
+  background: linear-gradient(80deg,#e0f2f1,#b2dfdb 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.topapp-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 0 0 12px 12px;
+  transition: filter .17s;
+}
+.topapp-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1 1 0;
+  padding: 20px;
+  justify-content: space-between;
+}
+.topapp-title {
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #009688;
+  min-height: 38px;
+}
+.topapp-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  margin-bottom: 4px;
+  gap: 12px;
+}
+.visit-btn {
+  text-decoration: none;
+  padding: 7.5px 16px;
+  border-radius: 5em;
+  background: linear-gradient(85deg,#00b8b5 70%,#7fffd4 120%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1em;
+  transition: background .18s, box-shadow .18s;
+  box-shadow: 0 2px 9px #15d5d524;
+  border: none;
+  outline: none;
+}
+.visit-btn:hover,
+.visit-btn:focus {
+  background: linear-gradient(80deg,#1976D2 50%,#00cbc7 120%);
+  color: #fff;
+  box-shadow: 0 4px 16px #005e607f;
+}
+.votes-chip {
+  background: #e0f2f1;
+  color: #00796b;
+  font-weight: 600;
+  font-size: 1em;
+  padding: 6px 14px 6px 14px;
+  border-radius: 100em;
+  min-width: 48px;
+  text-align: center;
+  box-shadow: 0 2px 7px #0080800a;
+}
+/* Responsive adjustments */
+@media (max-width:720px) {
+  .topapps-header { font-size: 1.28rem; }
+  .topapps-card-grid { grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 13px;}
+  .topapp-card-content { padding: 12.5px; gap: 7px; }
+}
+
+/* Cloud/word/sentence styles */
 .cloudpage {
   max-width: 920px;
   margin: 0 auto;

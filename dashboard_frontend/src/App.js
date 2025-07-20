@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import appData from "./app.json";
+import TopAppsPage from "./TopAppsPage";
 
 // Simple teal minimalist theme colors
 const COLORS = {
@@ -226,7 +227,8 @@ function App() {
   // --------- Navigation ----------
   const NAV = [
     ["/", "Dashboard"],
-    ["/clouds", "Word/Sentence Cloud"]
+    ["/clouds", "Word/Sentence Cloud"],
+    ["/top-apps", "Top 10 Apps per Week"]
   ];
   const [route, setRoute] = useState(window.location.hash.replace("#","") || "/");
   useEffect(() => {
@@ -392,6 +394,8 @@ function App() {
               </section>
             </div>
           </div>
+        ) : route === "/top-apps" ? (
+          <TopAppsPage />
         ) : null}
       </main>
     </div>
