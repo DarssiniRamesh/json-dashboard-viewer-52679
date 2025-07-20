@@ -162,6 +162,9 @@ const getWordCloudOptions = (tab) => ({
 function WordCloudPage() {
   const [tab, setTab] = useState("integrations");
 
+  // Compute only if tab or appJson changes
+  // (moved above to avoid ReferenceError and duplicate declaration)
+
   // D3-cloud rendering effect
   React.useEffect(() => {
     if (!words || words.length === 0) return;
