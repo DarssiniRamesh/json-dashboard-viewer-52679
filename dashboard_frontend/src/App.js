@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import appData from "./app.json";
 
+// DEBUG: Output the result of appData import
+console.log("DEBUG: Imported appData =", appData);
 // Simple teal minimalist theme colors
 const COLORS = {
   primary: "#008080",
@@ -226,11 +228,36 @@ function App() {
   // --------- Data Extraction from app.json ----------
   // Make robust: force into array if not already one
   let entriesRaw = appData.entries || appData || [];
+  // DEBUG: Print initial raw entries
+  console.log("DEBUG: entriesRaw =", entriesRaw, "typeof =", typeof entriesRaw);
+
   let entries = Array.isArray(entriesRaw)
     ? entriesRaw
     : (typeof entriesRaw === "object" && entriesRaw !== null)
       ? Object.values(entriesRaw)
       : [];
+
+  // DEBUG: Print normalized entries result
+  console.log("DEBUG: entries (normalized) =", entries, "length =", entries.length);
+
+  // If data is NOT available, create fallback sample data for troubleshooting UI
+  const fallbackEntries = [
+    {
+      app_id: "sample-1",
+      app_name: "Sample App",
+      app_created_at: "2025-06-22T00:00:00Z",
+      vote_count: 99,
+      unique_features: "AI, Cloud, Fun",
+      third_party_integrations: "API,DB",
+      challenges_faced: "Getting data to display",
+      visit_count: 1000,
+      preview_count: 100,
+    },
+  ];
+  if (!entries || entries.length === 0) {
+    console.warn("WARNING: No entries loaded from app.json! Using fallback UI data for diagnostics.");
+    entries = fallbackEntries;
+  }
 
   // Use "app_created_at" for grouping
   const submissionsByWeek = groupByWeek(entries, "app_created_at");
@@ -294,6 +321,21 @@ function App() {
         <Header/>
         {route === "/" ? (
           <div className="dashboard-container">
+            {/* Display a warning if fallback data is in use */}
+            {entries[0]?.app_id === "sample-1" && (
+              <div style={{ 
+                color: "#B71C1C", 
+                background: "#FFEBEE", 
+                border: "1px solid #E57373", 
+                padding: "10px", 
+                marginBottom: "16px", 
+                borderRadius: "6px",
+                textAlign: "center"
+              }}>
+                <b>Warning:</b> No data loaded from app.json! Showing test diagnostics. <br/>
+                (Check console logs for more details.)
+              </div>
+            )}
             <div className="dashboard-row">
               <TotalAppsWidget total={entries.length} />
               <SubmissionsByWeekWidget submissionsByWeek={submissionsByWeek}/>
