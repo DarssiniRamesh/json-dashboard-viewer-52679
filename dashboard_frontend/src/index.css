@@ -1,25 +1,11 @@
-/* Reset and base styles for dashboard app */
-body, html {
+html, body, #root {
+  height: 100%;
+  width: 100%;
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  background: #f8fafc;
-  color: #222;
+  background: transparent;
 }
-
-#root {
-  min-height: 100vh;
-  width: 100vw;
-  overflow-x: hidden;
-}
-
-/* Utility: Styling scrollbars (modern, minimal) */
-::-webkit-scrollbar {
-  width: 8px;
-  background: #f4f4f4;
-}
-::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
-  border-radius: 8px;
+body {
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 1.05rem;
+  color: #fff;
 }

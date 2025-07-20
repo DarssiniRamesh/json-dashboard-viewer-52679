@@ -1,31 +1,55 @@
-import React from "react";
-import "./App.css";
+import React, { useEffect, useState } from "react";
 import Dashboard from "./Dashboard";
+import "./App.css";
 
-/**
- * PUBLIC_INTERFACE
- * Root App component for the dashboard frontend.
- * Renders the main application structure including header, sidebar, and main dashboard area.
- */
+// PUBLIC_INTERFACE
 function App() {
+  /**
+   * Main App entrypoint for the Oceanic Analytics Dashboard.
+   * Loads analytics data from a static JSON, handles dark/blue theme.
+   */
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch local appvote.json asynchronously
+    fetch("./appvote.json")
+      .then((resp) => resp.json())
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        alert(
+          "Failed to load data: appvote.json is missing or malformed. Please ensure the JSON is present in /src."
+        );
+        setLoading(false);
+      });
+  }, []);
+
+  // Modern oceanic blue gradient background
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Dashboard Viewer</h1>
+    <div className="app-root">
+      <header className="header">
+        <h1>
+          <span role="img" aria-label="ocean">
+            🌊
+          </span>{" "}
+          Oceanic Analytics Dashboard
+        </h1>
       </header>
-      <aside className="App-sidebar">
-        <nav>
-          {/* Add navigation links/items for sidebar */}
-          <ul>
-            <li>Overview</li>
-            <li>Reports</li>
-            <li>Settings</li>
-          </ul>
-        </nav>
-      </aside>
-      <main className="App-content">
-        <Dashboard />
-      </main>
+      {loading ? (
+        <div className="loading">Loading analytics…</div>
+      ) : data ? (
+        <Dashboard data={data} />
+      ) : (
+        <div className="error">Dashboard data is unavailable.</div>
+      )}
+      <footer className="footer">
+        <span>
+          &copy; {new Date().getFullYear()} Oceanic Dashboard. Powered by appvote.json.
+        </span>
+      </footer>
     </div>
   );
 }
