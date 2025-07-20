@@ -50,7 +50,7 @@ function App() {
       <div className="app-root">
         <Sidebar />
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <header className="app-header">Dashboard Demo</header>
+          <header className="app-header">Contest Summary</header>
           <main>
             <Routes>
               <Route path="/" element={<TopAppsPage />} />

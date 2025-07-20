@@ -80,7 +80,18 @@ function AppCard({ app }) {
           >
             Visit App
           </a>
-          <div className="votes-chip" title="Votes">{app.vote_count ?? app.votes ?? 0} votes</div>
+          <div className="creator-chip" title="Created by" style={{
+            background: "#E0F7FA",
+            color: "#008080",
+            borderRadius: "999px",
+            padding: "3px 12px",
+            fontSize: "0.97em",
+            marginLeft: 8,
+            fontWeight: 500,
+            alignSelf: "center"
+          }}>
+            {app.username ? `By ${app.username}` : "Creator Unknown"}
+          </div>
         </div>
       </div>
     </div>
