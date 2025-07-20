@@ -1,0 +1,68 @@
+.wordcloud-main {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2em 2.2em;
+  margin: 2em auto;
+  max-width: 1140px;
+  box-shadow: 0 6px 34px rgba(44,77,140,0.11);
+}
+
+.wordcloud-container {
+  margin-top: 1em;
+  min-height: 154px;
+  background: linear-gradient(90deg, #e3f0ff 40%, #eafffb 100%);
+  border-radius: 14px;
+  padding: 1.7em 1em 1.2em 1.4em;
+  box-shadow: none;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.sentencecloud-container {
+  margin-top: 1.5em;
+  min-height: 110px;
+  background: #fdfdfd;
+  border-radius: 14px;
+  padding: 1em 1em 1em 1.3em;
+  box-shadow: 0 1px 6px rgba(50,50,60,.09);
+}
+
+.wordcloud-word:hover {
+  text-shadow: 1px 3px 10px rgba(80,90,110,0.16);
+  filter: brightness(1.12);
+  cursor: pointer;
+}
+
+.sentencecloud-sentence {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  margin-right: 0.4em;
+}
+
+.wordcloud-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #424242;
+  font-size: 1.15em;
+  padding: 0.7em 1.2em;
+  font-family: inherit;
+  font-weight: 700;
+  transition: border 0.22s, color 0.22s;
+  border-radius: 0;
+  margin-bottom: -1px;
+  cursor: pointer;
+  outline: none;
+}
+
+.wordcloud-tab.active,
+.wordcloud-tab:hover {
+  border-bottom: 3.8px solid #1976D2;
+  color: #1976D2;
+  background: #e3f0ff;
+}
+
+@media (max-width: 900px) {
+  .wordcloud-main {
+    padding: 1.2em 0.5em;
+  }
+}
