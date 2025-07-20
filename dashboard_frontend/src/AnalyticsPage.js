@@ -158,6 +158,24 @@ const AnalyticsPage = () => {
   // Chart: Show weekly trend for submissions
   function renderSubmissionTrend(weekData) {
     if (weekData.length === 0) return null;
+    // Custom label renderer for Bar
+    const renderBarLabel = (props) => {
+      const { x, y, width, height, value } = props;
+      // Position label above bar, centered
+      if (height < 8) return null; // don't clutter for nearly empty bars
+      return (
+        <text
+          x={x + width / 2}
+          y={y - 8}
+          fill={ACCENT_COLOR}
+          fontSize="16"
+          fontWeight="bold"
+          textAnchor="middle"
+        >
+          {value}
+        </text>
+      );
+    };
     return (
       <div className="chart-card" style={{background: "#fff", borderRadius: 12, margin: "1.5rem 0", boxShadow: "0 2px 8px #b7dfda33", padding: "1.5rem"}}>
         <h3 style={{color: PRIMARY_COLOR, marginBottom: "0.5em"}}>Submissions per Week</h3>
@@ -168,7 +186,7 @@ const AnalyticsPage = () => {
             <YAxis allowDecimals={false} />
             <Tooltip />
             <Legend />
-            <Bar dataKey="submissions" fill={PRIMARY_COLOR} name="Submissions" radius={[6,6,0,0]} />
+            <Bar dataKey="submissions" fill={PRIMARY_COLOR} name="Submissions" radius={[6,6,0,0]} label={renderBarLabel} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -178,6 +196,22 @@ const AnalyticsPage = () => {
   // Chart: Show weekly trend for votes
   function renderVoteTrend(weekData) {
     if (weekData.length === 0) return null;
+    // Custom label renderer for Line
+    const renderLineLabel = (props) => {
+      const { x, y, value } = props;
+      return (
+        <text
+          x={x}
+          y={y - 10}
+          fill={PRIMARY_COLOR}
+          fontSize="15"
+          fontWeight="bold"
+          textAnchor="middle"
+        >
+          {value}
+        </text>
+      );
+    };
     return (
       <div className="chart-card" style={{background: "#fff", borderRadius: 12, margin: "1.5rem 0", boxShadow: "0 2px 8px #b7dfda33", padding: "1.5rem"}}>
         <h3 style={{color: ACCENT_COLOR, marginBottom: "0.5em"}}>Votes per Week</h3>
@@ -188,7 +222,7 @@ const AnalyticsPage = () => {
             <YAxis allowDecimals={false} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="votes" stroke={ACCENT_COLOR} strokeWidth={3} name="Votes" dot={{r:6}} activeDot={{r:9}} />
+            <Line type="monotone" dataKey="votes" stroke={ACCENT_COLOR} strokeWidth={3} name="Votes" dot={{r:6}} activeDot={{r:9}} label={renderLineLabel} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -199,6 +233,29 @@ const AnalyticsPage = () => {
   function renderVotePie(weekData) {
     if (weekData.length < 2) return null;
     const COLORS = ["#1976D2", "#57b4ad", "#88cdc7", "#aedfdb", "#ccece8", "#e3f3f2","#b6dce0","#7ccbb7", "#239a91","#c2d7c2","#bef0db"];
+    // Custom label renderer for Pie
+    const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value, index }) => {
+      const RADIAN = Math.PI / 180;
+      // Position calculation for label outside segment
+      const radius = innerRadius + (outerRadius - innerRadius) * 0.67;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+      return (
+        <text
+          x={x}
+          y={y}
+          fill={COLORS[index % COLORS.length]}
+          fontSize="15"
+          fontWeight="bold"
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+        >
+          {value}
+        </text>
+      );
+    };
+
     return (
       <div className="chart-card" style={{background:"#fff", borderRadius: 12, margin:"1.5rem 0", boxShadow: "0 2px 8px #b7dfda33", padding:"1.5rem", minWidth:320}}>
         <h3 style={{color: PRIMARY_COLOR, marginBottom:"0.5em"}}>Votes Distribution</h3>
@@ -212,7 +269,7 @@ const AnalyticsPage = () => {
               cy="50%"
               outerRadius={90}
               fill={PRIMARY_COLOR}
-              label
+              label={renderPieLabel}
             >
               {weekData.map((entry, i) => (
                 <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
