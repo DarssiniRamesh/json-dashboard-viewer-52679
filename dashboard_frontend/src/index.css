@@ -1,11 +1,11 @@
-html, body, #root {
-  height: 100%;
+html, body {
   width: 100%;
+  height: 100%;
   margin: 0;
-  background: transparent;
+  box-sizing: border-box;
+  background: #f4faff;
 }
-body {
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  font-size: 1.05rem;
-  color: #fff;
+#root {
+  min-height: 100vh;
+  height: 100%;
 }
