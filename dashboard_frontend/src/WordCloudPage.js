@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import ReactWordcloud from "react-wordcloud";
 import "./WordCloudPage.css";
 import appJson from "./app.json";
 
@@ -128,40 +127,16 @@ const fallback = {
   ]
 };
 
-// Palette for word cloud
-const tealPalette = [
-  "#1976D2",
-  "#009688",
-  "#26C6DA",
-  "#43A047",
-  "#0288D1",
-  "#80CBC4",
-  "#00BCD4",
-  "#00897B",
-  "#00ACC1",
-  "#B2EBF2",
-  "#62CBC9",
-];
-
-const getWordCloudOptions = (tab) => ({
-  colors: tealPalette,
-  fontFamily: "Poppins, sans-serif",
-  fontSizes: [26, 64],
-  rotations: 3,
-  rotationAngles: [-10, 0, 10],
-  scale: "sqrt",
-  spiral: "archimedean",
-  transitionDuration: 800,
-  enableTooltip: true,
-  deterministic: false,
-  fontStyle: tab === "challenges" ? "italic" : "normal",
-  fontWeight: tab === "challenges" ? "normal" : "bold",
-});
-
+/**
+ * PUBLIC_INTERFACE
+ * WordCloudPage: A page with tabs for 'integrations', 'features', and 'challenges'.
+ * Displays a list of words/phrases and their weights as a placeholder for a word cloud.
+ * All references to 'react-wordcloud' have been removed for React 18 compatibility.
+ */
 function WordCloudPage() {
   const [tab, setTab] = useState("integrations");
 
-  // Compute only if tab or appJson changes
+  // Compute words/phrases based on tab and data
   const words = useMemo(() => {
     // If visualizations exist in static JSON (legacy schema), use that.
     if (
@@ -182,7 +157,7 @@ function WordCloudPage() {
         }));
       }
       if (tab === "challenges" && appJson.visualizations.challenges) {
-        return appJson.visualizations.challenges.map((sent, i) => ({
+        return appJson.visualizations.challenges.map((sent) => ({
           text: sent,
           value: 10 + (sent.length % 10),
         }));
@@ -219,9 +194,6 @@ function WordCloudPage() {
     return [];
   }, [tab, appJson]);
 
-  const options = getWordCloudOptions(tab);
-  if (tab === "challenges") options.fontSizes = [18, 38];
-
   return (
     <div className="wordcloud-page">
       <h2>Project Word &amp; Sentence Clouds</h2>
@@ -246,11 +218,31 @@ function WordCloudPage() {
         </button>
       </div>
       <div className="cloud-container">
-        <ReactWordcloud
-          words={words}
-          options={options}
-          style={{ height: 380, width: "100%" }}
-        />
+        {/* Placeholder for the word cloud using a stylized list */}
+        <ul className="wordcloud-list">
+          {words && words.length > 0 ? (
+            words
+              .sort((a, b) => b.value - a.value)
+              .map((word, idx) => (
+                <li
+                  key={idx}
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: `${Math.min(18 + word.value * 2, 48)}px`,
+                    color: tab === "challenges" ? "#1976D2" : "#00897B",
+                    margin: "4px 0",
+                  }}
+                >
+                  {word.text}{" "}
+                  <span style={{ color: "#888", fontWeight: 400 }}>
+                    ({word.value})
+                  </span>
+                </li>
+              ))
+          ) : (
+            <li>No data to display.</li>
+          )}
+        </ul>
       </div>
       <div className="cloud-legend">
         <span>
