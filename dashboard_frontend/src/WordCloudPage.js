@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import ReactWordcloud from "react-wordcloud";
+import * as d3 from "d3";
+import cloud from "d3-cloud";
 import "./WordCloudPage.css";
 import appJson from "./app.json";
 
@@ -161,6 +162,59 @@ const getWordCloudOptions = (tab) => ({
 function WordCloudPage() {
   const [tab, setTab] = useState("integrations");
 
+  // D3-cloud rendering effect
+  React.useEffect(() => {
+    if (!words || words.length === 0) return;
+
+    const width = 600;
+    const height = 380;
+
+    // Remove previous content
+    d3.select("#wordcloud-svg").selectAll("*").remove();
+
+    // Set up the cloud layout
+    const layout = cloud()
+      .size([width, height])
+      .words(words.map((d) => ({
+        text: d.text,
+        size: d.value * 3 + 12 // size scaling; adjust as needed
+      })))
+      .padding(5)
+      .rotate(() => (Math.random() > 0.5 ? 0 : 90))
+      .font("Poppins")
+      .fontWeight(tab === "challenges" ? "normal" : "bold")
+      .fontStyle(tab === "challenges" ? "italic" : "normal")
+      .spiral("archimedean")
+      .on("end", draw);
+
+    layout.start();
+
+    function draw(wordsArr) {
+      const svg = d3
+        .select("#wordcloud-svg")
+        .attr("viewBox", [0, 0, width, height])
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      svg
+        .selectAll("text")
+        .data(wordsArr)
+        .enter()
+        .append("text")
+        .style("font-family", "Poppins, sans-serif")
+        .style("fill", (d, i) => tealPalette[i % tealPalette.length])
+        .style("font-style", tab === "challenges" ? "italic" : "normal")
+        .style("font-weight", tab === "challenges" ? "normal" : "bold")
+        .style("font-size", (d) => `${d.size}px`)
+        .attr("text-anchor", "middle")
+        .attr("transform", function (d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text((d) => d.text);
+    }
+    // eslint-disable-next-line
+  }, [tab, JSON.stringify(words)]);
+
   // Compute only if tab or appJson changes
   const words = useMemo(() => {
     // If visualizations exist in static JSON (legacy schema), use that.
@@ -246,11 +300,7 @@ function WordCloudPage() {
         </button>
       </div>
       <div className="cloud-container">
-        <ReactWordcloud
-          words={words}
-          options={options}
-          style={{ height: 380, width: "100%" }}
-        />
+        <svg id="wordcloud-svg" width="100%" height="380"></svg>
       </div>
       <div className="cloud-legend">
         <span>
