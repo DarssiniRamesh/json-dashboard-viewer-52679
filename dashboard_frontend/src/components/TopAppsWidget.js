@@ -9,61 +9,51 @@ function applyFilters(votes, filters) {
   });
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * TopAppsWidget: Displays the top-voted apps, clickable with image, name, and vote count.
+ */
 export function TopAppsWidget({ data, filters }) {
   if (!data || !data.votes) return null;
   const filteredVotes = applyFilters(data.votes, filters);
 
-  // Tally voted apps with totals and average NPS
-  const appCounts = {};
+  // Tally by app (voteCount comes from raw count, not from # of records)
+  // Use unique app IDs for accuracy and sum voteCount
+  const appMap = {};
   filteredVotes.forEach((v) => {
-    if (!appCounts[v.appName]) {
-      appCounts[v.appName] = {
+    if (!appMap[v.appId]) {
+      appMap[v.appId] = {
+        appName: v.appName,
+        imageUrl: v.appImage,
+        link: v.appLink,
+        description: v.appDescription,
         votes: 0,
-        imageUrl: v.appImage || "",
-        link: v.appLink || "",
-        npsSum: 0,
-        npsCount: 0,
-        description: v.appDescription || "",
       };
     }
-    appCounts[v.appName].votes += 1;
-    if (typeof v.npsScore === "number") {
-      appCounts[v.appName].npsSum += v.npsScore;
-      appCounts[v.appName].npsCount += 1;
-    }
+    appMap[v.appId].votes = (appMap[v.appId].votes || 0) + (v.voteCount || 0);
   });
 
-  // Sort by votes descending, then NPS descending
-  const sorted = Object.entries(appCounts)
-    .map(([name, stats]) => ({
-      ...stats,
-      appName: name,
-      avgNps:
-        stats.npsCount > 0
-          ? Math.round((stats.npsSum / stats.npsCount) * 10) / 10
-          : "-",
-    }))
-    .sort((a, b) =>
-      b.votes !== a.votes
-        ? b.votes - a.votes
-        : (b.avgNps || 0) - (a.avgNps || 0)
-    );
-
-  const top = sorted.slice(0, 3);
+  // Convert and sort by total votes
+  const sorted = Object.values(appMap)
+    .sort((a, b) => b.votes - a.votes)
+    .slice(0, 5);
 
   return (
     <div className="dashboard-widget highlighted" id="top-apps">
       <div className="widget-title">🏆 Top Voted Apps</div>
       <div className="top-apps-list">
-        {top.length === 0 ? (
+        {sorted.length === 0 ? (
           <div style={{ color: "#86a6bc", fontStyle: "italic" }}>No data</div>
         ) : (
-          top.map((app, i) => (
-            <div
+          sorted.map((app, i) => (
+            <a
               key={app.appName}
               className={`top-app-card rank-${i + 1}`}
               title={app.appName}
+              href={app.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "inherit" }}
             >
               {app.imageUrl && (
                 <img
@@ -74,23 +64,13 @@ export function TopAppsWidget({ data, filters }) {
                 />
               )}
               <div className="app-title">{app.appName}</div>
-              {app.link && (
-                <a
-                  className="app-link"
-                  href={app.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Visit App ↗
-                </a>
-              )}
               <div className="app-meta">
-                {app.votes} votes · NPS: {app.avgNps}
+                {app.votes} vote{app.votes === 1 ? "" : "s"}
               </div>
               {app.description && (
                 <div className="app-description">{app.description}</div>
               )}
-            </div>
+            </a>
           ))
         )}
       </div>
