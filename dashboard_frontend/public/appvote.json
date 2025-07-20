@@ -1,0 +1,23 @@
+[
+  {
+    "app_id": "d4aa5aef-6a8e-4caf-ac6f-16ec590f5ba3",
+    "app_name": "Bachelor's cooking ",
+    "app_link": "https://kavia-main.d1cqph7k12miyf.amplifyapp.com/",
+    "image_url": "https://wycneutglyqklbussmuo.supabase.co/storage/v1/object/public/app-images/4785fd1d-aa57-40ce-a7cf-ef895b93aacf/863d5081-85c7-4125-81d1-249ee916985e.jpg?_cb=1748639100232",
+    "feature_list": null,
+    "unique_features": null,
+    "third_party_integrations": null,
+    "challenges_faced": null,
+    "app_created_at": "2025-05-30 21:05:00.449777+00",
+    "contest_week_id": 1,
+    "contest_week_name": "Week 1",
+    "start_date": "2025-05-30 10:53:14.163+00",
+    "end_date": "2025-06-03 15:55:24.89+00",
+    "profile_id": "4785fd1d-aa57-40ce-a7cf-ef895b93aacf",
+    "username": "Ruban Gunasekaran",
+    "registration_number": "23BCS1045",
+    "profile_created_at": "2025-05-30 20:56:23.240671+00",
+    "vote_count": 16
+  },
+  ...
+]

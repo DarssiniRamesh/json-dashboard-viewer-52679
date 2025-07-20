@@ -12,7 +12,7 @@ export default function App() {
 
   // PUBLIC_INTERFACE
   useEffect(() => {
-    fetch("./appvote.json")
+    fetch("/appvote.json")
       .then((r) => r.json())
       .then((jsonArr) => {
         // Transform appvote.json array into {votes: [...]} shape for widgets
