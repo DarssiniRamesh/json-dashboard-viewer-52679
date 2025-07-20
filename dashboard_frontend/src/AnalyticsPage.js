@@ -158,35 +158,69 @@ const AnalyticsPage = () => {
   // Chart: Show weekly trend for submissions
   function renderSubmissionTrend(weekData) {
     if (weekData.length === 0) return null;
-    // Custom label renderer for Bar
+    // Custom label renderer for Bar - always show, responsive position
     const renderBarLabel = (props) => {
-      const { x, y, width, height, value } = props;
-      // Position label above bar, centered
-      if (height < 8) return null; // don't clutter for nearly empty bars
+      const { x, y, width, height, value, index } = props;
+      // Always render label, use ellipsis if value is too wide
+      let labelY = y - 10;
+      if (labelY < 14) labelY = 14; // Prevent cutoff at top
+      const valueStr = String(value);
+      let maxLen = 6;
+      let display = valueStr.length > maxLen ? valueStr.slice(0, maxLen - 1) + "…" : valueStr;
+      let fontSize = width < 30 ? 11 : width < 55 ? 13 : 16;
+
       return (
         <text
           x={x + width / 2}
-          y={y - 8}
+          y={labelY}
           fill={ACCENT_COLOR}
-          fontSize="16"
+          fontSize={fontSize}
           fontWeight="bold"
           textAnchor="middle"
+          dominantBaseline="auto"
+          style={{ pointerEvents: "none", userSelect: "none" }}
         >
-          {value}
+          {display}
         </text>
       );
     };
+
     return (
-      <div className="chart-card" style={{background: "#fff", borderRadius: 12, margin: "1.5rem 0", boxShadow: "0 2px 8px #b7dfda33", padding: "1.5rem"}}>
-        <h3 style={{color: PRIMARY_COLOR, marginBottom: "0.5em"}}>Submissions per Week</h3>
+      <div className="chart-card"
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          margin: "1.5rem 0",
+          boxShadow: "0 2px 8px #b7dfda33",
+          padding: "2.2rem 1.6rem 1.5rem 2.5rem",
+          minHeight: 340
+        }}>
+        <h3 style={{ color: PRIMARY_COLOR, marginBottom: "0.5em" }}>Submissions per Week</h3>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={weekData}>
+          <BarChart
+            data={weekData}
+            margin={{ top: 36, right: 30, left: 30, bottom: 52 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="week" style={{fontWeight:500,fontSize:"1rem"}}/>
-            <YAxis allowDecimals={false} />
+            <XAxis
+              dataKey="week"
+              style={{ fontWeight: 500, fontSize: "1rem" }}
+              interval={0}
+              angle={-26}
+              textAnchor="end"
+              height={54}
+              tickMargin={8}
+            />
+            <YAxis allowDecimals={false} width={45} tick={{ fontSize: 14 }} />
             <Tooltip />
             <Legend />
-            <Bar dataKey="submissions" fill={PRIMARY_COLOR} name="Submissions" radius={[6,6,0,0]} label={renderBarLabel} />
+            <Bar
+              dataKey="submissions"
+              fill={PRIMARY_COLOR}
+              name="Submissions"
+              radius={[6, 6, 0, 0]}
+              label={renderBarLabel}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -196,33 +230,72 @@ const AnalyticsPage = () => {
   // Chart: Show weekly trend for votes
   function renderVoteTrend(weekData) {
     if (weekData.length === 0) return null;
-    // Custom label renderer for Line
+    // Custom label renderer for Line - always show, with anti-cutoff and scaling
     const renderLineLabel = (props) => {
-      const { x, y, value } = props;
+      const { x, y, value, index } = props;
+      // Always draw label above each point
+      let labelY = y - 16;
+      if (labelY < 14) labelY = 14; // Prevent cutoff at top
+      const valueStr = String(value);
+      let fontSize = 14;
+      if (typeof x === "number" && typeof y === "number") {
+        fontSize = x < 48 || x > 590 ? 12 : 15;
+      }
       return (
         <text
           x={x}
-          y={y - 10}
-          fill={PRIMARY_COLOR}
-          fontSize="15"
+          y={labelY}
+          fill={ACCENT_COLOR}
+          fontSize={fontSize}
           fontWeight="bold"
           textAnchor="middle"
+          dominantBaseline="auto"
+          style={{ pointerEvents: "none", userSelect: "none" }}
         >
-          {value}
+          {valueStr}
         </text>
       );
     };
+
     return (
-      <div className="chart-card" style={{background: "#fff", borderRadius: 12, margin: "1.5rem 0", boxShadow: "0 2px 8px #b7dfda33", padding: "1.5rem"}}>
-        <h3 style={{color: ACCENT_COLOR, marginBottom: "0.5em"}}>Votes per Week</h3>
+      <div className="chart-card"
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          margin: "1.5rem 0",
+          boxShadow: "0 2px 8px #b7dfda33",
+          padding: "2.2rem 1.6rem 1.5rem 2.5rem",
+          minHeight: 340
+        }}>
+        <h3 style={{ color: ACCENT_COLOR, marginBottom: "0.5em" }}>Votes per Week</h3>
         <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={weekData}>
+          <LineChart
+            data={weekData}
+            margin={{ top: 36, right: 30, left: 30, bottom: 52 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="week" style={{fontWeight:500,fontSize:"1rem"}}/>
-            <YAxis allowDecimals={false} />
+            <XAxis
+              dataKey="week"
+              style={{ fontWeight: 500, fontSize: "1rem" }}
+              interval={0}
+              angle={-26}
+              textAnchor="end"
+              height={54}
+              tickMargin={8}
+            />
+            <YAxis allowDecimals={false} width={45} tick={{ fontSize: 14 }} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="votes" stroke={ACCENT_COLOR} strokeWidth={3} name="Votes" dot={{r:6}} activeDot={{r:9}} label={renderLineLabel} />
+            <Line
+              type="monotone"
+              dataKey="votes"
+              stroke={ACCENT_COLOR}
+              strokeWidth={3}
+              name="Votes"
+              dot={{ r: 6 }}
+              activeDot={{ r: 9 }}
+              label={renderLineLabel}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
