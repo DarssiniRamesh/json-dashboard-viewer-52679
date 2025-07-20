@@ -63,20 +63,105 @@ function WeekTabs({ weekIds, weeks, activeWeek, onWeekChange }) {
   );
 }
 
+// PUBLIC_INTERFACE
 function AppCard({ app }) {
   return (
-    <div className="topapp-card">
-      <div className="topapp-img-wrap">
-        <img src={app.image_url} alt={app.app_name} className="topapp-img" />
+    <div
+      className="topapp-card"
+      style={{
+        background: COLORS.white,
+        borderRadius: 16,
+        padding: "20px 14px 20px 14px",
+        boxShadow: "0 2px 9px rgba(0,0,0,0.07)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        minHeight: 210,
+        height: "100%",
+        maxWidth: 290,
+        justifyContent: "flex-start",
+      }}
+    >
+      <div className="topapp-img-wrap" style={{ marginBottom: 10 }}>
+        <img
+          src={app.image_url}
+          alt={app.app_name}
+          className="topapp-img"
+          style={{ width: 56, height: 56, borderRadius: 12, objectFit: "cover", display: "block" }}
+        />
       </div>
-      <div className="topapp-card-content">
-        <div className="topapp-title">{app.app_name}</div>
-        <div className="topapp-action-row">
+      <div
+        className="topapp-card-content"
+        style={{
+          width: "100%",
+          flex: "1 1 auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <div
+          className="topapp-title"
+          title={app.app_name}
+          style={{
+            fontWeight: 700,
+            fontSize: 16,
+            color: COLORS.text,
+            marginBottom: 7,
+            textAlign: "center",
+            width: "100%",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            overflowWrap: "break-word",
+            lineHeight: 1.25,
+            padding: "0 8px",
+            maxHeight: 44,
+            overflowY: "auto",
+          }}
+        >
+          {app.app_name}
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: "#757575",
+            marginBottom: 4,
+            textAlign: "center",
+            minHeight: 18,
+            lineHeight: "18px",
+            padding: "0 6px",
+            width: "100%",
+            wordBreak: "break-word",
+          }}
+        >
+          {app.subtitle}
+        </div>
+        <div className="topapp-action-row" style={{
+          marginTop: "auto",
+          display: "flex",
+          flexDirection: "row",
+          gap: 10,
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%"
+        }}>
           <a
             href={app.app_link}
             target="_blank"
             rel="noopener noreferrer"
             className="visit-btn"
+            style={{
+              background: COLORS.primary,
+              color: COLORS.white,
+              padding: "6px 17px",
+              borderRadius: "999px",
+              textDecoration: "none",
+              fontWeight: 500,
+              fontSize: 14,
+              transition: "background 0.2s",
+              marginRight: 4,
+              whiteSpace: "nowrap"
+            }}
           >
             Visit App
           </a>
@@ -89,9 +174,9 @@ function AppCard({ app }) {
               borderRadius: "999px",
               padding: "3px 12px",
               fontSize: "0.97em",
-              marginLeft: 8,
               fontWeight: 500,
               alignSelf: "center",
+              marginLeft: 0
             }}
           >
             {app.username ? `By ${app.username}` : "Creator Unknown"}
