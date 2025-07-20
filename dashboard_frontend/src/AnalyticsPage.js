@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import "./AnalyticsPage.css";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 // PUBLIC_INTERFACE
 /**
@@ -16,12 +27,18 @@ function AnalyticsPage() {
     fetch("./app.json")
       .then((res) => res.json())
       .then((data) => {
+        // Debug: Log full JSON when loaded
+        console.debug("[AnalyticsPage] Loaded app.json:", data);
+
         // app.json contains an array of apps/submissions with vote info and date fields.
         // Example: { app_id, app_name, vote_count, app_created_at, contest_week_name, ... }
         processAnalyticsData(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("[AnalyticsPage] Failed to load app.json", err);
+        setLoading(false);
+      });
   }, []);
 
   function processAnalyticsData(items) {
@@ -45,15 +62,20 @@ function AnalyticsPage() {
     const weekData = {};
     let totalSubmissions = 0;
     let totalVotes = 0;
-    let minDate = null,
-      maxDate = null;
+    let minDate = null, maxDate = null;
 
     // Use vote_count from app.json as the true vote field
-    for (const item of items) {
-      // Use app_created_at or any other available date for time grouping/reporting
+    items.forEach((item, idx) => {
+      // Debug: Output each item processed
+      console.debug(`[AnalyticsPage] Processing item ${idx}:`, item);
+
       const dateStr =
-        item.app_created_at || item.createdAt || item.updatedAt || item.start_date || item.end_date;
-      if (!dateStr) continue;
+        item.app_created_at ||
+        item.createdAt ||
+        item.updatedAt ||
+        item.start_date ||
+        item.end_date;
+      if (!dateStr) return;
       const weekKey = getWeekKey(item);
       if (!weekData[weekKey]) weekData[weekKey] = { week: weekKey, submissions: 0, votes: 0 };
       weekData[weekKey].submissions += 1;
@@ -66,13 +88,21 @@ function AnalyticsPage() {
       const d = new Date(dateStr);
       if (!minDate || d < minDate) minDate = d;
       if (!maxDate || d > maxDate) maxDate = d;
-    }
+    });
+
+    // After aggregation, log the resulting objects
+    console.debug("[AnalyticsPage] Submissions by week (object):", weekData);
+    console.debug("[AnalyticsPage] Total submissions counted:", totalSubmissions);
+    console.debug("[AnalyticsPage] Total votes counted:", totalVotes);
 
     // Fill in missing weeks (or contest weeks) for a nicer chart
     let weekList = [];
     if (Object.keys(weekData).length > 0) {
       weekList = Object.values(weekData).sort((a, b) => (a.week > b.week ? 1 : -1));
     }
+
+    // Debug output for final weeklyData
+    console.debug("[AnalyticsPage] Aggregated weeklyData:", weekList);
 
     setWeeklyData(weekList);
     setTotals({
@@ -136,7 +166,14 @@ function AnalyticsPage() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="votes" stroke="#115e59" name="Votes" strokeWidth={2} activeDot={{ r: 8 }} />
+              <Line
+                type="monotone"
+                dataKey="votes"
+                stroke="#115e59"
+                name="Votes"
+                strokeWidth={2}
+                activeDot={{ r: 8 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
