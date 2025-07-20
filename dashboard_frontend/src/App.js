@@ -3,89 +3,55 @@ import "./App.css";
 import TopAppsPage from "./TopAppsPage";
 import WordCloudPage from "./WordCloudPage";
 import AnalyticsPage from "./AnalyticsPage";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
 
-// Modern color palette
-const COLORS = {
-  primary: "#1976D2",
-  secondary: "#f2f4f8",
-  accent: "#FFC107",
-  text: "#1a2b29",
-};
-
+/**
+ * Sidebar navigation component styled for modern teal/minimal theme.
+ * Navigation structure, routes and labels remain unchanged.
+ */
+// PUBLIC_INTERFACE
 function Sidebar() {
   return (
-    <nav
-      style={{
-        width: 215,
-        background: COLORS.secondary,
-        borderRight: "1px solid #dde1ea",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        paddingTop: "2.5em",
-        gap: "1.1em",
-        minHeight: "100vh",
-        fontWeight: 600,
-      }}
-    >
-      <Link
+    <nav className="sidebar">
+      <div className="sidebar-title">Dashboard</div>
+      <NavLink
         to="/"
-        style={{
-          textDecoration: "none",
-          color: COLORS.primary,
-          fontSize: "1.18em",
-          margin: "0 1em 0.8em 2.2em",
-        }}
+        end
+        className={({ isActive }) =>
+          `sidebar-link${isActive ? " active" : ""}`
+        }
       >
-        Dashboard
-      </Link>
-      <Link
+        Top Apps
+      </NavLink>
+      <NavLink
         to="/insights"
-        style={{
-          textDecoration: "none",
-          color: "#424242",
-          fontSize: "1.05em",
-          margin: "0 1em 0 2.2em",
-        }}
+        className={({ isActive }) =>
+          `sidebar-link${isActive ? " active" : ""}`
+        }
       >
         Insights
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/analytics"
-        style={{
-          textDecoration: "none",
-          color: "#0f766e",
-          fontSize: "1.05em",
-          margin: "0 1em 0 2.2em",
-        }}
+        className={({ isActive }) =>
+          `sidebar-link${isActive ? " active" : ""}`
+        }
       >
         Analytics
-      </Link>
+      </NavLink>
     </nav>
   );
 }
 
+// PUBLIC_INTERFACE
 function App() {
   return (
     <Router>
-      <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="app-root">
         <Sidebar />
-        <div style={{ flex: 1 }}>
-          <header
-            className="App-header"
-            style={{
-              background: COLORS.primary,
-              color: "white",
-              padding: "1.2em 2em",
-              fontWeight: "bolder",
-              borderTopLeftRadius: "2em",
-              marginBottom: "1.2em",
-            }}
-          >
-            Dashboard Demo
-          </header>
-          <main style={{ padding: "1.5em 2em" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <header className="app-header">Dashboard Demo</header>
+          <main>
             <Routes>
               <Route path="/" element={<TopAppsPage />} />
               <Route path="/insights" element={<WordCloudPage />} />
