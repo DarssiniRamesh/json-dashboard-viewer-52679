@@ -8,76 +8,22 @@
   font-family: 'Poppins', Arial, Helvetica, sans-serif;
 }
 
-.tabs {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  margin-bottom: 26px;
-  gap: 1.2em;
-}
-
-.tabs button {
-  font-size: 1.1rem;
-  padding: 9px 28px 9px 28px;
-  border: none;
-  border-radius: 26px 26px 0 0;
-  background: #e3f3fc;
-  cursor: pointer;
-  color: #1976D2;
-  font-family: inherit;
-  font-weight: 500;
-  margin-right: 0;
-  margin-left: 0;
-  transition: 
-    background 0.2s,
-    color 0.2s,
-    box-shadow 0.2s,
-    font-weight 0.2s;
-  outline: none;
-  box-shadow: 0 2px 8px 0 rgba(41, 190, 240, 0.04);
-}
-
-.tabs button.active {
-  background: linear-gradient(103deg, #1976d2 80%, #26c6da 100%);
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 3px 18px 0 rgba(25, 118, 210, 0.13);
-  border-bottom: 3.5px solid #00ACC1;
-  text-shadow: 0 1px 8px #00808015;
+.wordcloud-section {
+  margin-bottom: 36px;
 }
 
 .cloud-container {
-  min-height: 345px;
+  min-height: 315px;
   background: #edf8fb;
-  border-radius: 44px;
-  margin-bottom: 28px;
+  border-radius: 40px;
+  margin-bottom: 30px;
   box-shadow: 0 1px 18px 0 rgba(64, 144, 195, 0.09);
   padding: 36px 6px 20px 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-}
-
-/* Remove legacy list styling; all clouds handled by react-wordcloud */
-.basic-cloud,
-.sentence-cloud,
-.cloud-container ul {
-  display: none !important;
-}
-
-.cloud-legend {
-  padding-top: 10px;
-  color: #1976d2;
-  font-size: 1.06em;
-  font-family: inherit;
-  letter-spacing: 0.01em;
-  background: #e3f2fd21;
-  border-radius: 22px;
-  margin-bottom: 0;
-  margin-top: 0;
-  width: fit-content;
-  box-shadow: none;
+  width: 100%;
 }
 
 .react-wordcloud {
@@ -92,6 +38,7 @@
   border: 1.5px solid #b2ebf2;
   box-shadow: 0 1.5px 10px 0 #0288d124;
   font-size: 1.07em;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
 }
 
 .wordcloud-page h2 {
@@ -104,6 +51,16 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.wordcloud-section h3 {
+  color: #43a047;
+  margin-bottom: 8px;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 940px) {
   .wordcloud-page {
@@ -111,11 +68,8 @@
     padding: 16px 4vw;
   }
   .cloud-container {
-    min-height: 250px;
+    min-height: 200px;
     padding: 10px 0 18px 0;
-  }
-  .tabs {
-    gap: 0.5em;
   }
   .wordcloud-page h2 {
     font-size: 1.5em;
