@@ -136,11 +136,11 @@ function TopAppsWidget({ weekId, apps }) {
         </thead>
         <tbody>
           {apps.slice(0,10).map((app,i) =>
-            <tr key={app.id || app.name || i}>
-              <td>{app.name}</td>
+            <tr key={app.app_id || app.app_name || i}>
+              <td>{app.app_name ?? app.name}</td>
               <td>{app.preview_count ?? "-"}</td>
               <td>{app.visit_count ?? "-"}</td>
-              <td>{app.votes ?? 0}</td>
+              <td>{app.vote_count ?? app.votes ?? 0}</td>
             </tr>
           )}
         </tbody>
@@ -224,7 +224,6 @@ function App() {
   }, []);
 
   // --------- Data Extraction from app.json ----------
-  // app.json expected to be an array of app entries with submission/vote info
   // Make robust: force into array if not already one
   let entriesRaw = appData.entries || appData || [];
   let entries = Array.isArray(entriesRaw)
@@ -232,36 +231,34 @@ function App() {
     : (typeof entriesRaw === "object" && entriesRaw !== null)
       ? Object.values(entriesRaw)
       : [];
-  // handle both "appData.entries" (if array is under this field) or just array
 
-  // Get week grouping for submissions and votes
-  const submissionsByWeek = groupByWeek(entries, "submission_date"); // {weekId: [apps...]}
+  // Use "app_created_at" for grouping
+  const submissionsByWeek = groupByWeek(entries, "app_created_at");
   const weekIds = Object.keys(submissionsByWeek).sort();
-  // Map: {weekId: total vote count
+
+  // Use "vote_count"
   const votesByWeek = {};
   let voteTotal = 0;
   entries.forEach((app) => {
-    const date = new Date(app.submission_date);
+    const date = new Date(app.app_created_at);
     const weekId = `${date.getFullYear()}-W${getWeekNumber(date)}`;
-    votesByWeek[weekId] = (votesByWeek[weekId] || 0) + (app.votes ?? 0);
-    voteTotal += (app.votes ?? 0);
+    const votes = app.vote_count ?? app.votes ?? 0;
+    votesByWeek[weekId] = (votesByWeek[weekId] || 0) + votes;
+    voteTotal += votes;
   });
 
-  // Four widgets for top 10 apps per week
+  // Top apps per week
   const weekTopApps = {};
   weekIds.forEach((weekId) => {
-    // Sort by votes, then visits, then preview_count for each week
     weekTopApps[weekId] = submissionsByWeek[weekId]
       .slice()
-      .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0)
-                      || (b.visit_count ?? 0) - (a.visit_count ?? 0)
-                      || (b.preview_count ?? 0) - (a.preview_count ?? 0));
+      .sort((a, b) => (b.vote_count ?? b.votes ?? 0) - (a.vote_count ?? a.votes ?? 0)
+                    || (b.visit_count ?? 0) - (a.visit_count ?? 0)
+                    || (b.preview_count ?? 0) - (a.preview_count ?? 0));
   });
 
-  // Word clouds and sentence cloud source extraction
-  // Suppose every entry has "third_party_integrations", "unique_features", "challenges" fields (comma/semicolon or string array)
+  // Word and sentence clouds
   function wordFreq(arrOfStr) {
-    // Flatten and count words
     const freq = {};
     arrOfStr.forEach(phrase => {
       if (!phrase) return;
@@ -273,18 +270,17 @@ function App() {
     });
     return freq;
   }
-  // Unique Feature Cloud
   const featureWords = wordFreq(entries.map(x=>x.unique_features));
-  // Third Party Cloud
   const integrationWords = wordFreq(entries.map(x=>x.third_party_integrations));
-  // Challenges (sentence chips)
   const challengeSentences = [];
   entries.forEach(x => {
-    if (!x.challenges) return;
-    if (Array.isArray(x.challenges))
-      x.challenges.forEach(s=>challengeSentences.push(s.trim()));
+    // Use "challenges_faced" as primary, fallback to "challenges"
+    const challengesValue = x.challenges_faced ?? x.challenges;
+    if (!challengesValue) return;
+    if (Array.isArray(challengesValue))
+      challengesValue.forEach(s=>challengeSentences.push(s.trim()));
     else
-      x.challenges.toString().split(/[;•\n]/).forEach(s=>{
+      challengesValue.toString().split(/[;•\\n]/).forEach(s=>{
         const s2 = s.trim();
         if (s2.length > 2) challengeSentences.push(s2);
       });
