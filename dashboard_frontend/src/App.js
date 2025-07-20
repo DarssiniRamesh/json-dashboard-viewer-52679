@@ -1,67 +1,29 @@
 import React from "react";
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import TopAppsPage from "./TopAppsPage";
 import WordCloudPage from "./WordCloudPage";
 import AnalyticsPage from "./AnalyticsPage";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import "./App.css";
 
-// Modern color palette
-const COLORS = {
-  primary: "#1976D2",
-  secondary: "#f2f4f8",
-  accent: "#FFC107",
-  text: "#1a2b29",
-};
-
+// Sidebar with teal minimal styling and active highlighting
 function Sidebar() {
+  const location = useLocation();
+  const links = [
+    { to: "/", label: "Analytics" },
+    { to: "/top-apps", label: "Top Apps" },
+    { to: "/wordcloud", label: "Word Cloud" },
+  ];
   return (
-    <nav
-      style={{
-        width: 215,
-        background: COLORS.secondary,
-        borderRight: "1px solid #dde1ea",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        paddingTop: "2.5em",
-        gap: "1.1em",
-        minHeight: "100vh",
-        fontWeight: 600,
-      }}
-    >
-      <Link
-        to="/"
-        style={{
-          textDecoration: "none",
-          color: COLORS.primary,
-          fontSize: "1.18em",
-          margin: "0 1em 0.8em 2.2em",
-        }}
-      >
-        Dashboard
-      </Link>
-      <Link
-        to="/insights"
-        style={{
-          textDecoration: "none",
-          color: "#424242",
-          fontSize: "1.05em",
-          margin: "0 1em 0 2.2em",
-        }}
-      >
-        Insights
-      </Link>
-      <Link
-        to="/analytics"
-        style={{
-          textDecoration: "none",
-          color: "#0f766e",
-          fontSize: "1.05em",
-          margin: "0 1em 0 2.2em",
-        }}
-      >
-        Analytics
-      </Link>
+    <nav className="sidebar">
+      {links.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          className={`sidebar-link${location.pathname === link.to ? " active" : ""}`}
+        >
+          {link.label}
+        </Link>
+      ))}
     </nav>
   );
 }
@@ -69,30 +31,16 @@ function Sidebar() {
 function App() {
   return (
     <Router>
-      <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="app-root">
         <Sidebar />
-        <div style={{ flex: 1 }}>
-          <header
-            className="App-header"
-            style={{
-              background: COLORS.primary,
-              color: "white",
-              padding: "1.2em 2em",
-              fontWeight: "bolder",
-              borderTopLeftRadius: "2em",
-              marginBottom: "1.2em",
-            }}
-          >
-            Dashboard Demo
-          </header>
-          <main style={{ padding: "1.5em 2em" }}>
-            <Routes>
-              <Route path="/" element={<TopAppsPage />} />
-              <Route path="/insights" element={<WordCloudPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-            </Routes>
-          </main>
-        </div>
+        <main>
+          {/* Header/Banner removed as instructed */}
+          <Routes>
+            <Route path="/" element={<AnalyticsPage />} />
+            <Route path="/top-apps" element={<TopAppsPage />} />
+            <Route path="/wordcloud" element={<WordCloudPage />} />
+          </Routes>
+        </main>
       </div>
     </Router>
   );
