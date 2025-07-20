@@ -89,7 +89,7 @@ function aggregateKeywords(primarySets, allSet, minKeywords = 12) {
 
 const topApps = [...appData]
   .sort((a, b) => (b.score || 0) - (a.score || 0))
-  .slice(0, 5);
+  .slice(0, 10);
 
 const integrationKeywordsTop = extractKeywords(topApps, 'third_party_integrations');
 const integrationKeywordsAll = extractAllKeywords(appData, 'third_party_integrations');
