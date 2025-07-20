@@ -1,0 +1,92 @@
+.analytics-page {
+  max-width: 1000px;
+  margin: 32px auto 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(39, 174, 96, 0.06);
+  padding: 28px 32px 24px 32px;
+  font-family: system-ui, 'Segoe UI', Arial, sans-serif;
+}
+
+.analytics-title {
+  color: #0f766e;
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.totals-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  background: #e0f2fe;
+  border-radius: 9px;
+  padding: 18px 10px;
+  margin-bottom: 28px;
+  color: #0f766e;
+  font-size: 1.12rem;
+}
+.totals-label {
+  color: #134e4a;
+  font-weight: 500;
+}
+.totals-value {
+  color: #14b8a6;
+  font-weight: 600;
+  margin-left: 4px;
+}
+@media (max-width: 700px) {
+  .totals-card {
+    grid-template-columns: 1fr 1fr;
+    font-size: 1rem;
+    padding: 10px 4px;
+    gap: 10px;
+  }
+  .analytics-page {
+    padding: 8px 8px 16px 8px;
+  }
+}
+
+.charts-container {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.chart-section {
+  background: #fafafa;
+  flex: 1 1 440px;
+  min-width: 310px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  padding: 18px 12px 2px 22px;
+  box-shadow: 0 2px 8px rgba(20,184,166,0.07);
+  border: 1px solid #d1fae5;
+}
+.chart-section-title {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  color: #134e4a;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Loading and tip styles */
+.analytics-loading {
+  color: #15b8a6;
+  font-size: 1.34rem;
+  margin: 70px auto;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+.chart-footer-tip {
+  color: #0e7490;
+  margin-top: 20px;
+  font-size: 1rem;
+  text-align: right;
+  padding-right: 12px;
+  font-style: italic;
+}

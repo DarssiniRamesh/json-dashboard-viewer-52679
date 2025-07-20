@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import TopAppsPage from "./TopAppsPage";
 import WordCloudPage from "./WordCloudPage";
+import AnalyticsPage from "./AnalyticsPage";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 // Modern color palette
@@ -50,6 +51,17 @@ function Sidebar() {
       >
         Insights
       </Link>
+      <Link
+        to="/analytics"
+        style={{
+          textDecoration: "none",
+          color: "#0f766e",
+          fontSize: "1.05em",
+          margin: "0 1em 0 2.2em",
+        }}
+      >
+        Analytics
+      </Link>
     </nav>
   );
 }
@@ -77,6 +89,7 @@ function App() {
             <Routes>
               <Route path="/" element={<TopAppsPage />} />
               <Route path="/insights" element={<WordCloudPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
             </Routes>
           </main>
         </div>
