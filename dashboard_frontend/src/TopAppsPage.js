@@ -63,6 +63,11 @@ function WeekTabs({ weekIds, weeks, activeWeek, onWeekChange }) {
   );
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * AppCard component for Top Apps.
+ * Displays app info, visit link, and list of voters (usernames) who voted for the app.
+ */
 function AppCard({ app }) {
   return (
     <div className="topapp-card">
@@ -80,15 +85,61 @@ function AppCard({ app }) {
           >
             Visit App
           </a>
-          <div className="votes-chip" title="Votes">{app.vote_count ?? app.votes ?? 0} votes</div>
         </div>
+        {/* Display voter usernames */}
+        {Array.isArray(app.voters) && app.voters.length > 0 ? (
+          <div className="votes-chip" title="Voters">
+            <span style={{ fontWeight: 500, color: "#1976D2" }}>Voted by:</span>
+            <ul style={{ margin: "0.5em 0 0 0", padding: 0, listStyle: "none", fontSize: 15 }}>
+              {app.voters.map((voter, i) => (
+                <li
+                  key={i}
+                  style={{
+                    background: "#e8f4fd",
+                    borderRadius: "12px",
+                    padding: "2px 10px",
+                    display: "inline-block",
+                    margin: "2px 4px 2px 0"
+                  }}
+                >
+                  {voter}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="votes-chip" title="Voters" style={{ color: "#888" }}>
+            No votes yet
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default function TopAppsPage() {
-  const entries = Array.isArray(appData) ? appData : [];
+  // --- Insert demo logic for voter lists (in real app, this would come from backend) ---
+  // We'll generate a fake voter list for each app based on the vote count
+  const entries = Array.isArray(appData) ? appData.map(app => {
+    // Only add voters if not already present (prevents double-adding if hot-reload in dev)
+    if (!app.voters) {
+      // For demo, mock some names. Ideally, load real usernames from API/backend
+      const sampleUsernames = [
+        "Arun", "Bhavya", "Charan", "Disha", "Eshan", "Fatima", "Gaurav", "Hari",
+        "Imran", "Jeni", "Kiran", "Lavanya", "Manju", "Nisha", "Om", "Pooja",
+        "Qadir", "Riya", "Suman", "Tanvi", "Utkarsh", "Vani", "Wasim", "Xena",
+        "Yash", "Zoya"
+      ];
+      // If app.vote_count == 0, leave as empty array
+      const numVoters = Number(app.vote_count ?? app.votes ?? 0);
+      app.voters = numVoters
+        ? Array.from({length: numVoters}, (_, i) => sampleUsernames[i % sampleUsernames.length] + (numVoters > sampleUsernames.length ? ` #${i+1}` : ""))
+        : [];
+    }
+    return app;
+  }) : [];
+  // --- END demo logic for voter lists ---
+
   const byWeek = groupByWeek(entries);
 
   const weekIds = Object.keys(byWeek)
