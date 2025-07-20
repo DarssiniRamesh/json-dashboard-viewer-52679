@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import appData from "./app.json";
 
-// DEBUG: Output the result of appData import
-console.log("DEBUG: Imported appData =", appData);
 // Simple teal minimalist theme colors
 const COLORS = {
   primary: "#008080",
@@ -27,8 +25,6 @@ function groupByWeek(arr, dateKey) {
   });
   return weeks;
 }
-
-// Return number of week in year for JS Date
 function getWeekNumber(date) {
   // Copy date so don't modify original
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -40,7 +36,6 @@ function getWeekNumber(date) {
   const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
   return weekNo;
 }
-
 function getWeekLabel(weekId) {
   // E.g. '2024-W13' → 'Week 13 (2024)'
   const [year, wk] = weekId.split("-W");
@@ -48,10 +43,9 @@ function getWeekLabel(weekId) {
 }
 
 // ----- Widgets -----
-
+/** Widget for showing total apps */
 // PUBLIC_INTERFACE
 function TotalAppsWidget({ total }) {
-  /** Widget for showing total apps */
   return (
     <div className="dashboard-card highlight">
       <h3>Total Apps</h3>
@@ -59,13 +53,11 @@ function TotalAppsWidget({ total }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function SubmissionsByWeekWidget({ submissionsByWeek }) {
   /** Bar chart widget for number of submissions per week */
   const weekIds = Object.keys(submissionsByWeek).sort();
   const max = Math.max(...weekIds.map((w) => submissionsByWeek[w].length));
-
   return (
     <div className="dashboard-card">
       <h3>Submissions by Week</h3>
@@ -86,7 +78,6 @@ function SubmissionsByWeekWidget({ submissionsByWeek }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function TotalVotesWidget({ totalVotes }) {
   /** Widget for showing total votes */
@@ -97,7 +88,6 @@ function TotalVotesWidget({ totalVotes }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function VotesByWeekWidget({ votesByWeek }) {
   /** Bar chart widget for votes per week */
@@ -123,7 +113,6 @@ function VotesByWeekWidget({ votesByWeek }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function TopAppsWidget({ weekId, apps }) {
   /** Widget showing top 10 apps for a given week */
@@ -150,12 +139,11 @@ function TopAppsWidget({ weekId, apps }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function WordCloud({ words }) {
   /** Simple word-frequency cloud as responsive spans */
   // Normalize counts for font size [0.9em-2em]
-  const min = Math.min(...Object.values(words)), max = Math.max(...Object.values(words));
+  const min = Math.min(...Object.values(words) || [1]), max = Math.max(...Object.values(words) || [2]);
   return (
     <div className="word-cloud">
       {Object.entries(words).map(([w,c])=>
@@ -173,7 +161,6 @@ function WordCloud({ words }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function SentenceCloud({ sentences }) {
   /** Sentences in light capsule "chips", cloud layout */
@@ -185,7 +172,6 @@ function SentenceCloud({ sentences }) {
     </div>
   );
 }
-
 // PUBLIC_INTERFACE
 function Sidebar({ nav, active, onNav }) {
   return (
@@ -203,7 +189,6 @@ function Sidebar({ nav, active, onNav }) {
     </aside>
   );
 }
-
 // PUBLIC_INTERFACE
 function Header() {
   return (
@@ -213,6 +198,11 @@ function Header() {
   );
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * Dashboard application rendering data directly from app.json.
+ * All widget/analytic/page logic consumes the real array from appData.
+ */
 function App() {
   // --------- Navigation ----------
   const NAV = [
@@ -225,20 +215,8 @@ function App() {
       setRoute(window.location.hash.replace("#","") || "/");
   }, []);
 
-  // --------- Data Extraction from app.json ----------
-  // Make robust: force into array if not already one
-  let entriesRaw = appData.entries || appData || [];
-  // DEBUG: Print initial raw entries
-  console.log("DEBUG: entriesRaw =", entriesRaw, "typeof =", typeof entriesRaw);
-
-  let entries = Array.isArray(entriesRaw)
-    ? entriesRaw
-    : (typeof entriesRaw === "object" && entriesRaw !== null)
-      ? Object.values(entriesRaw)
-      : [];
-
-  // DEBUG: Print normalized entries result
-  console.log("DEBUG: entries (normalized) =", entries, "length =", entries.length);
+  // --------- Data Extraction: use appData as array directly ----------
+  const entries = Array.isArray(appData) ? appData : [];
 
   // If data is NOT available, create fallback sample data for troubleshooting UI
   const fallbackEntries = [
@@ -254,19 +232,16 @@ function App() {
       preview_count: 100,
     },
   ];
-  if (!entries || entries.length === 0) {
-    console.warn("WARNING: No entries loaded from app.json! Using fallback UI data for diagnostics.");
-    entries = fallbackEntries;
-  }
+  const validEntries = entries && entries.length > 0 ? entries : fallbackEntries;
 
   // Use "app_created_at" for grouping
-  const submissionsByWeek = groupByWeek(entries, "app_created_at");
+  const submissionsByWeek = groupByWeek(validEntries, "app_created_at");
   const weekIds = Object.keys(submissionsByWeek).sort();
 
   // Use "vote_count"
   const votesByWeek = {};
   let voteTotal = 0;
-  entries.forEach((app) => {
+  validEntries.forEach((app) => {
     const date = new Date(app.app_created_at);
     const weekId = `${date.getFullYear()}-W${getWeekNumber(date)}`;
     const votes = app.vote_count ?? app.votes ?? 0;
@@ -280,8 +255,8 @@ function App() {
     weekTopApps[weekId] = submissionsByWeek[weekId]
       .slice()
       .sort((a, b) => (b.vote_count ?? b.votes ?? 0) - (a.vote_count ?? a.votes ?? 0)
-                    || (b.visit_count ?? 0) - (a.visit_count ?? 0)
-                    || (b.preview_count ?? 0) - (a.preview_count ?? 0));
+                  || (b.visit_count ?? 0) - (a.visit_count ?? 0)
+                  || (b.preview_count ?? 0) - (a.preview_count ?? 0));
   });
 
   // Word and sentence clouds
@@ -297,17 +272,16 @@ function App() {
     });
     return freq;
   }
-  const featureWords = wordFreq(entries.map(x=>x.unique_features));
-  const integrationWords = wordFreq(entries.map(x=>x.third_party_integrations));
+  const featureWords = wordFreq(validEntries.map(x=>x.unique_features));
+  const integrationWords = wordFreq(validEntries.map(x=>x.third_party_integrations));
   const challengeSentences = [];
-  entries.forEach(x => {
-    // Use "challenges_faced" as primary, fallback to "challenges"
+  validEntries.forEach(x => {
     const challengesValue = x.challenges_faced ?? x.challenges;
     if (!challengesValue) return;
     if (Array.isArray(challengesValue))
       challengesValue.forEach(s=>challengeSentences.push(s.trim()));
     else
-      challengesValue.toString().split(/[;•\\n]/).forEach(s=>{
+      challengesValue.toString().split(/[;\u2022\\n]/).forEach(s=>{
         const s2 = s.trim();
         if (s2.length > 2) challengeSentences.push(s2);
       });
@@ -322,13 +296,13 @@ function App() {
         {route === "/" ? (
           <div className="dashboard-container">
             {/* Display a warning if fallback data is in use */}
-            {entries[0]?.app_id === "sample-1" && (
-              <div style={{ 
-                color: "#B71C1C", 
-                background: "#FFEBEE", 
-                border: "1px solid #E57373", 
-                padding: "10px", 
-                marginBottom: "16px", 
+            {validEntries === fallbackEntries && (
+              <div style={{
+                color: "#B71C1C",
+                background: "#FFEBEE",
+                border: "1px solid #E57373",
+                padding: "10px",
+                marginBottom: "16px",
                 borderRadius: "6px",
                 textAlign: "center"
               }}>
@@ -337,7 +311,7 @@ function App() {
               </div>
             )}
             <div className="dashboard-row">
-              <TotalAppsWidget total={entries.length} />
+              <TotalAppsWidget total={validEntries.length} />
               <SubmissionsByWeekWidget submissionsByWeek={submissionsByWeek}/>
               <TotalVotesWidget totalVotes={voteTotal}/>
               <VotesByWeekWidget votesByWeek={votesByWeek}/>
